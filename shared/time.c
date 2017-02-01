@@ -5,7 +5,6 @@
 #include "time.h"
 #include "segment.h"
 #include "debug.h"
-#include "process.h"
 
 void display_corner(char* time) {
 	char* cour = time;
@@ -41,7 +40,7 @@ void tic_PIT() {
 	char timestring[8];
 	sprintf(timestring,"%02d:%02d:%02d", hr, min, sec);
 	
-	ordonnance();
+	//ordonnance();
 	display_corner(timestring);
 }
 
