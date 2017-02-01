@@ -15,6 +15,9 @@ export PLATFORM_TOOLS
 #Rajouté :
 QEMU = /usr/bin/qemu-system-i386
 QEMUOPTS = -cpu pentium -rtc base=localtime -m 64M -gdb tcp::1234 -S -kernel kernel/kernel.bin
+
+GO_QEMUOPTS = -cpu pentium -rtc base=localtime -m 64M -gdb tcp::1234 -kernel kernel.bin
+
 #fin rajout
 
 
@@ -35,3 +38,6 @@ clean:
 #rajouté :
 run:
 	$(QEMU) $(QEMUOPTS)
+
+go:
+	$(QEMU) $(GO_QEMUOPTS)
