@@ -12,6 +12,12 @@ export OUTPUT
 PLATFORM_TOOLS := $(OUTPUT)/platform-tools.mk
 export PLATFORM_TOOLS
 
+#Rajouté :
+QEMU = /usr/bin/qemu-system-i386
+QEMUOPTS = -cpu pentium -rtc base=localtime -m 64M -gdb tcp::1234 -S -kernel kernel/kernel.bin
+#fin rajout
+
+
 all: | kernel/$(PLATFORM_TOOLS) user/$(PLATFORM_TOOLS)
 	$(MAKE) -C user/ all VERBOSE=$(VERBOSE)
 	$(MAKE) -C kernel/ kernel.bin VERBOSE=$(VERBOSE)
@@ -26,3 +32,6 @@ clean:
 	$(MAKE) clean -C kernel/
 	$(MAKE) clean -C user/
 
+#rajouté :
+run:
+	$(QEMU) $(QEMUOPTS)
