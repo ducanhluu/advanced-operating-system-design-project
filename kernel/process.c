@@ -6,7 +6,7 @@
 #include "process.h"
 #include "console.h"
 #include "time.h"
-#include "malloc.c.h"
+#include "../shared/malloc.c"
 
 struct process* process_list_head = NULL;
 struct process* process_list_tail = NULL;
@@ -89,8 +89,8 @@ void ordonnance() {
 	}
 }
 
-uint32_t nbr_secondes() {
-	return time;
+int32_t nbr_secondes() {
+	return (int32_t)time;
 }
 
 void insertSleep(struct process* process) {
@@ -181,9 +181,6 @@ void proc1(void) {
 		// printf(__FUNCTION__);
 		printf("[temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(), mon_pid());
 		dors(2);
-		// sti();
-		// hlt();
-		// cli();
 	}
 }
 
@@ -192,9 +189,6 @@ void proc2(void) {
 		// printf(__FUNCTION__);
 		printf("[temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(), mon_pid());
 		dors(3);
-		// sti();
-		// hlt();
-		// cli();
 	}
 }
 void proc3(void) {
@@ -202,9 +196,6 @@ void proc3(void) {
 		// printf(__FUNCTION__);
 		printf("[temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(), mon_pid());
 		dors(5);
-		// sti();
-		// hlt();
-		// cli();
 	}
 }
 

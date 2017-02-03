@@ -9,7 +9,7 @@ void idle();
 void proc1();
 void init_process_stack();
 void ordonnance();
-uint32_t nbr_secondes();
+int32_t nbr_secondes();
 void ctx_sw(int* old, int* new);
 
 typedef enum {CHOSEN, ACTIVABLE, SLEEPING} process_state;

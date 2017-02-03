@@ -2,6 +2,8 @@
 #include "cpu.h"
 #include "console.h"
 #include "stdio.h"
+#include "time.h"
+#include "process.h"
 
 int fact(int n)
 {
@@ -27,9 +29,8 @@ void kernel_start(void)
 	masque_IRQ(0,0);
 
 	printf("\f");
-	printf("Coucou, i=%d", i);
 
-	printf("guigre@Guigre-PC:~$ idle\n");
+	printf("group_14@awsome_pc:~$\n");
 
 	init_process_stack();
 
