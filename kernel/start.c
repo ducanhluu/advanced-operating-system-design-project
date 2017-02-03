@@ -22,11 +22,29 @@ void kernel_start(void)
 
 	i = fact(i);
 
-	printf("\f");
-	printf("Coucou, i=%d", i);
+	cli();
+	set_clock_fqc();
+	init_traitant_IT(32, &traitant_IT_32);
+	masque_IRQ(0,0);
 
-	while(1)
-	  hlt();
+	printf("\f");
+	loading_bar(2);
+	printf("\f");
+
+	printf("guigre@Guigre-PC:~$ idle\n");
+
+	init_process_stack();
+
+	idle();
+
+	// Unmask external IT
+	/* sti(); */
+	// on ne doit jamais sortir de kernel_start
+	while (1) {
+		// cette fonction arrete le processeur
+		hlt();
+	}
+
 
 	return;
 }
