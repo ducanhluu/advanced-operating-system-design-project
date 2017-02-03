@@ -107,8 +107,7 @@ int vprintf(const char *fmt, va_list args)
 	return 0;
 }
 
-int
-printf(const char *fmt, ...)
+int printf(const char *fmt, ...)
 {
 	va_list	args;
 	int err;

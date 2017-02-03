@@ -1,5 +1,7 @@
 #include "debugger.h"
 #include "cpu.h"
+#include "console.h"
+#include "printf.c"
 
 int fact(int n)
 {
@@ -18,6 +20,8 @@ void kernel_start(void)
 	i = 10;
 
 	i = fact(i);
+
+	printf("\t Coucou");
 
 	while(1)
 	  hlt();
