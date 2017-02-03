@@ -1,7 +1,7 @@
 #include "debugger.h"
 #include "cpu.h"
 #include "console.h"
-#include "printf.c"
+#include "stdio.h"
 #include "../shared/time.c"
 
 int fact(int n)
@@ -28,8 +28,7 @@ void kernel_start(void)
 	masque_IRQ(0,0);
 
 	printf("\f");
-	loading_bar(2);
-	printf("\f");
+	printf("Coucou, i=%d", i);
 
 	printf("guigre@Guigre-PC:~$ idle\n");
 
