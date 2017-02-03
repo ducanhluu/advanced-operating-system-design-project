@@ -1,7 +1,7 @@
 #include "debugger.h"
 #include "cpu.h"
 #include "console.h"
-#include "printf.c"
+#include "stdio.h"
 #include "../shared/time.c"
 
 int fact(int n)
@@ -23,7 +23,7 @@ void kernel_start(void)
 	i = fact(i);
 
 	printf("\f");
-	printf("Coucou, i=%d", i);
+	printf("Coucou _ hello, i=%d", i);
 
 	while(1)
 	  hlt();
