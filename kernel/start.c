@@ -2,6 +2,7 @@
 #include "cpu.h"
 #include "console.h"
 #include "printf.c"
+#include "../shared/time.c"
 
 int fact(int n)
 {
@@ -21,7 +22,8 @@ void kernel_start(void)
 
 	i = fact(i);
 
-	printf("\t Coucou");
+	printf("\f");
+	printf("Coucou, i=%d", i);
 
 	while(1)
 	  hlt();
