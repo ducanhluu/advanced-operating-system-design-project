@@ -2,7 +2,6 @@
 #include "cpu.h"
 #include "console.h"
 #include "stdio.h"
-#include "../shared/time.c"
 
 int fact(int n)
 {
