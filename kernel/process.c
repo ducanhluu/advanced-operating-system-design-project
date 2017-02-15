@@ -1,7 +1,8 @@
 #include <cpu.h>
-#include <inttypes.h>
+//#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "process.h"
 #include "console.h"
@@ -125,7 +126,7 @@ void insertSleep(struct process* process) {
 void dors(int nbr_secs) {
 	chosen->state = SLEEPING;
 	chosen->wakeUpTime = nbr_secondes() + nbr_secs;
-	insertSleep(chosen); 
+	insertSleep(chosen);
 	ordonnance();
 }
 
@@ -141,7 +142,7 @@ int32_t cree_processus(void (*code)(void), char *nom) {
 	pidmax++;
 	if (pidmax < PROCESS_TABLE_SIZE) {
 		struct process* newprocess = (struct process*)malloc(sizeof(struct process));
-		
+
 		if (process_list_tail == NULL || process_list_head == NULL) {
 			newprocess->state = CHOSEN;
 			process_list_tail = newprocess;
@@ -161,7 +162,7 @@ int32_t cree_processus(void (*code)(void), char *nom) {
 	} else {
 
 		printf("error, cannot insert %s", nom);
-		
+
 		return -1;
 	}
 }
@@ -207,5 +208,5 @@ void init_process_stack(void) {
 	cree_processus((void*)&proc3, "proc3");
 
 	chosen = pick(&process_list_head, &process_list_tail);
-	
+
 }

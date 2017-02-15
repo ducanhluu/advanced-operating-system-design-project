@@ -1,6 +1,10 @@
 #ifndef __PROCESS_H__
 #define __PROCESS_H__
 
+//#include "../shared/malloc.c"
+#include "../shared/inttypes.h"
+//#include "message_queue.h"
+
 #define MAX_NAME_LENGTH 64
 #define STACK_SIZE 512
 #define PROCESS_TABLE_SIZE 5
