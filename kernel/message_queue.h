@@ -7,6 +7,8 @@ extern void *malloc(int size);
 #define NULL 0
 #endif
 
+#include "process.h"
+
 /*int pcount(int fid, int *count);*/
 int pcreate(int count);
 /*int pdelete(int fid);
@@ -19,6 +21,7 @@ struct queue {
   int nb_message;
   int size_max;
   int *messages;
+  int nb_p_bloques;
   int *p_bloques; //processus bloques sur la file
 };
 
