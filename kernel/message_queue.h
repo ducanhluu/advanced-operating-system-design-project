@@ -11,8 +11,8 @@ extern void *malloc(int size);
 int pcreate(int count);
 /*int pdelete(int fid);
 int preceive(int fid,int *message);
-int preset(int fid);
-int psend(int fid, int message);*/
+int preset(int fid);*/
+int psend(int fid, int message);
 
 struct queue {
   int fid;

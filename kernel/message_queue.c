@@ -15,7 +15,7 @@ struct queue **queues = NULL;// /*malloc(/*NBQUEUE **/ 1/*sizeof(*queues)*/)*/;
   return -1;
   }*/
 
-int pcreate(int count){
+int pcreate(int count) {
   if (queues == NULL) {
     queues = malloc(NBQUEUE * sizeof(*queues));
   }
@@ -32,7 +32,7 @@ int pcreate(int count){
 }
 
 
-int pdelete(int fid){
+int pdelete(int fid) {
   int i = 0;
   while (i < nb_queue && queues[i]->fid != fid) {
     i++;
@@ -51,10 +51,30 @@ int pdelete(int fid){
 int preceive(int fid,int *message) {
    return -1;
 }
-int preset(int fid){
+
+
+int preset(int fid) {
    return -1;
-}
+}*/
+
 int psend(int fid, int message) {
-   return -1;
+  if (fid >= nb_queue) {
+    return -1;
+  }
+  if (queues[fid]->nb_message == 0 ){//}&& nb_p_bloques !=0) {
+    queues[fid]->messages = &message;
+    int a;
+    //preceive(fid, &a);
+  }
+  if (queues[fid]->nb_message == queues[fid]->size_max) {
+
+  }
+
+
+
+// trouver la taille de la file
+
+
+
+   return 0;
 }
-*/
