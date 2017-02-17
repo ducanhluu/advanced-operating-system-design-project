@@ -19,6 +19,7 @@ struct queue {
   int nb_message;
   int size_max;
   int *messages;
+  int *p_bloques; //processus bloques sur la file
 };
 
 #endif
