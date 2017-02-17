@@ -83,7 +83,7 @@ int psend(int fid, int message) {
   }
   if (queues[fid]->nb_message == 0 ){//}&& nb_p_bloques !=0) {
     queues[fid]->messages = &message;
-    int a;
+    //int a;
     //preceive(fid, &a);
   }
   if (queues[fid]->nb_message == queues[fid]->size_max) {
