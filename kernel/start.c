@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "time.h"
 #include "process.h"
+#include "sem.h"
 
 int fact(int n)
 {
@@ -32,9 +33,21 @@ void kernel_start(void)
 
 	printf("group_14@awsome_pc:~$\n");
 
-	init_process_stack();
-
-	idle();
+        int sem1;
+       
+        sem1 = screate(2);
+        assert(sem1 >= 0);
+        assert(scount(sem1) == 2);
+        assert(signal(sem1) == 0);
+        assert(scount(sem1) == 3);
+        assert(signaln(sem1, 2) == 0);
+        assert(scount(sem1) == 5);
+        assert(wait(sem1) == 0);
+        assert(scount(sem1) == 4);
+        assert(sreset(sem1, 7) == 0);
+        assert(scount(sem1) == 7);
+        assert(sdelete(sem1) == 0);
+        printf("ok.\n");
 
 	// Unmask external IT
 	/* sti(); */
