@@ -1,11 +1,6 @@
 #ifndef MESSAGE_QUEUE_H_
 #define MESSAGE_QUEUE_H_
-#if 0
-#include "../shared/malloc.c"
-#else
-void *mem_alloc(unsigned long length);
-void mem_free(void *zone, unsigned long length);
-#endif
+#include "mem.h"
 
 #include "process.h"
 
