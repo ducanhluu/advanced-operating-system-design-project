@@ -32,7 +32,9 @@ void kernel_start(void)
 	printf("\f");
 
 	printf("group_14@awsome_pc:~$\n");
-
+/* ------------------------------------------------ */
+/* ---- TEST 10 - SEMAPHORE ----------------------- */
+/* ------------------------------------------------ */
         int sem1;
        
         sem1 = screate(2);
@@ -48,7 +50,13 @@ void kernel_start(void)
         assert(scount(sem1) == 7);
         assert(sdelete(sem1) == 0);
         printf("ok.\n");
+/* -------------------------------------------------- */
+/* ---- END OF TEST 10 ------------------------------ */
+/* -------------------------------------------------- */
 
+        init_process_stack();
+        idle();
+        
 	// Unmask external IT
 	/* sti(); */
 	// on ne doit jamais sortir de kernel_start
