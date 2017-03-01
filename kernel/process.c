@@ -210,3 +210,37 @@ void init_process_stack(void) {
 	chosen = pick(&process_list_head, &process_list_tail);
 
 }
+
+void maj_sleeping(int pid) {
+  //Remet wake up time à zero après réception d'un message
+  struct process* cour = sleeping_list_head;
+  struct process* proc;
+  if (cour == NULL) {
+    //erreur
+    printf("Process not found in sleeping list\n");
+  }
+  if (cour->pid == pid) {
+    proc = cour;
+    sleeping_list_head = cour->next;
+    if (cour->next == NULL) {
+      sleeping_list_tail = NULL;
+    }
+  } else {
+    while(cour->next != NULL && cour->next->pid!=pid) {
+      cour = cour->next;
+    }
+    if (cour->next == NULL) {
+      //erreur
+      printf("Process not found in sleeping list\n");
+    } 
+    proc = cour->next;
+    cour->next = proc->next;
+    if (proc->next == NULL) {
+      sleeping_list_tail = cour;
+    }
+  }
+  //Processus supprimé de la liste sleeping
+  proc->wakeUpTime = nbr_secondes();
+  insertSleep(chosen);
+  ordonnance();
+}

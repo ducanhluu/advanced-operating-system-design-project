@@ -1,7 +1,7 @@
 #include "message_queue.h"
 #include <stdlib.h>
 //#include <stdio.h>
-//#include "process.h"
+#include "process.h"
 
 #define NBQUEUE 5
 
@@ -52,27 +52,27 @@ int pdelete(int fid) {
   if (i == nb_queue) {
     return -1;
   }
+   //Les processus bloqués deviennent activables
   for (int j = 0; j < queues[i]->nb_p_bloques; j++) {
-
+    maj_sleeping(queues[i]->p_bloques[j]);
   }
   queues[i]->nb_p_bloques = 0;
-  //free(queues[i]->p_bloques);
+  //free(queues[i]->p_bloques); TODO
   queues[i]->nb_message = 0;
   queues[i]->size_max = 0;
-  //free(queues[i]->messages);
-
-
-
-
+  //free(queues[i]->messages); TODO
   return 0;
 }
 
-/*
+
 int preceive(int fid,int *message) {
+  fid++;
+  *message=0;
    return -1;
 }
 
 
+/*
 int preset(int fid) {
    return -1;
 }*/

@@ -22,7 +22,7 @@ struct queue {
   int size_max;
   int *messages;
   int nb_p_bloques;
-  int *p_bloques; //processus bloques sur la file
+  int *p_bloques; //processus bloques sur la file (pids stockés)
 };
 
 #endif
