@@ -1,0 +1,15 @@
+#define NBQUEUE 5 
+
+int psend(int fid, int message);
+int pcount(int fid, int *count);
+int pcreate(int count);
+int pdelete(int fid);
+int preceive(int fid,int *message);
+int preset(int fid);
+
+struct queue {
+  int fid;
+  int nb_message;
+  int size_max;
+  int *messages;
+}

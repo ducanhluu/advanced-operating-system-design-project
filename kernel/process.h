@@ -1,7 +1,6 @@
 #ifndef __PROCESS_H__
 #define __PROCESS_H__
 
-//#include "../shared/malloc.c"
 #include "../shared/inttypes.h"
 //#include "message_queue.h"
 

@@ -3,8 +3,8 @@
 #if 0
 #include "../shared/malloc.c"
 #else
-extern void *malloc(int size);
-#define NULL 0
+void *mem_alloc(unsigned long length);
+void mem_free(void *zone, unsigned long length);
 #endif
 
 #include "process.h"
