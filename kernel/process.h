@@ -15,6 +15,8 @@ void ordonnance();
 int32_t nbr_secondes();
 void ctx_sw(int* old, int* new);
 void maj_sleeping(int pid);
+int mon_pid();
+void dors(int nbr_secs);
 
 struct process* process_list_head;
 struct process* process_list_tail;

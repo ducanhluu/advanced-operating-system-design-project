@@ -7,7 +7,7 @@
 #define NBQUEUE 5
 
 int nb_queue = 0;
-struct queue **queues = NULL;// /*malloc(/*NBQUEUE **/ 1/*sizeof(*queues)*/)*/;
+struct queue **queues = NULL;
 
 int pcount(int fid, int *count){
     int i = 0;
@@ -67,9 +67,43 @@ int pdelete(int fid) {
 
 
 int preceive(int fid,int *message) {
-  fid++;
-  *message=0;
-   return -1;
+  int i = 0;
+  while (i < nb_queue && queues[i]->fid != fid) {
+    i++;
+  }
+  if (i == nb_queue) {
+    return -1;
+  }
+  if (queues[i]->nb_message == 0) {
+    //état bloqué sur file vide
+    queues[i]->nb_p_bloques++;
+    queues[i]->p_bloques[queues[i]->nb_p_bloques+1]=mon_pid();
+    dors(100000);
+  }
+  if (queues[i]->nb_message > 0) {
+    *message = queues[i]->messages[0];
+    queues[i]->nb_message--;
+    for (int j=0; j<queues[i]->nb_message; j++) {
+      queues[i]->messages[j] = queues[i]->messages[j+1];
+    }
+    if (queues[i]->nb_message == queues[i]->size_max - 1) {
+      //la file était pleine
+      if (queues[i]->nb_p_bloques > 0) {
+	maj_sleeping(queues[i]->p_bloques[0]);
+	queues[i]->nb_p_bloques--;
+	for (int j=0; j<queues[i]->nb_p_bloques; j++) {
+	  queues[i]->p_bloques[j] = queues[i]->p_bloques[j+1];
+	}
+      }
+    }
+  } else {
+    //on a exécuté preset ou pdelete
+    return -1;
+  }
+  return 0;
+
+  //TODO le truc avec chprio :
+  //Un processus bloqué sur file vide et dont la priorité est changée par chprio, est considéré comme le dernier processus (le plus jeune) de sa nouvelle priorité. 
 }
 
 
