@@ -57,11 +57,10 @@ int pdelete(int fid) {
   for (int j = 0; j < queues[i]->nb_p_bloques; j++) {
     maj_sleeping(queues[i]->p_bloques[j]);
   }
-  queues[i]->nb_p_bloques = 0;
-  mem_free(queues[i]->p_bloques, PROCESS_TABLE_SIZE * sizeof(int));
-  queues[i]->nb_message = 0;
-  queues[i]->size_max = 0;
-  mem_free(queues[i]->messages, queues[i]->size_max * sizeof(int));
+  nb_queue--;
+  queues[i] = queues[nb_queue];
+  mem_free(queues[i], 4 * sizeof(int) + PROCESS_TABLE_SIZE * sizeof(int) + queues[i]->size_max * sizeof(int));
+
   return 0;
 }
 
@@ -73,10 +72,24 @@ int preceive(int fid,int *message) {
 }
 
 
-/*
+
 int preset(int fid) {
-   return -1;
-}*/
+  int i = 0;
+  while (i < nb_queue && queues[i]->fid != fid) {
+    i++;
+  }
+  if (i == nb_queue) {
+    return -1;
+  }
+  for (int j = 0; j < queues[i]->nb_p_bloques; j++) {
+    maj_sleeping(queues[i]->p_bloques[j]);
+  }
+  queues[i]->nb_p_bloques = 0;
+  mem_free(queues[i]->p_bloques, PROCESS_TABLE_SIZE * sizeof(int));
+  queues[i]->nb_message = 0;
+  mem_free(queues[i]->messages, queues[i]->size_max * sizeof(int));
+  return 0;
+}
 
 int psend(int fid, int message) {
   if (fid >= nb_queue) {
