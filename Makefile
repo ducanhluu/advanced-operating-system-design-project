@@ -41,3 +41,6 @@ run:
 
 go:
 	$(QEMU) $(GO_QEMUOPTS)
+
+gdb:
+	gdb -d kernel -ex "tar rem :1234" kernel/kernel.bin
