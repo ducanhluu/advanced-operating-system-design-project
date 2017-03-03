@@ -8,65 +8,38 @@
 #include "time.h"
 #include "../shared/malloc.c"
 
-struct process* process_list_head = NULL;
-struct process* process_list_tail = NULL;
+LIST_HEAD(process_list);
 
-struct process* sleeping_list_head = NULL;
-struct process* sleeping_list_tail = NULL;
+LIST_HEAD(sleeping_list);
 
 struct process* chosen = NULL;
 
 int pidmax = -1;
 
-void display_list(struct process* head) {
-	struct process* cour = head;
-	while(cour != NULL) {
-		printf("%s ", cour->name);
-		cour = cour->next;
+void display_list(link* head) {
+	printf("process_list : \n");
+	struct process* cour;
+	queue_for_each(cour, head, struct process, links) {
+		printf("%s [%d]\n", cour->name, cour->prio);
 	}
-	printf("\n");
-}
-
-void insert(struct process* p, struct process** head, struct process** tail) {
-	if (*head == NULL || *tail == NULL) {
-		*head = p;
-		*tail = p;
-	} else {
-		(*tail)->next = p;
-		p->next = NULL;
-		*tail = p;
-	}
-}
-
-struct process* pick(struct process** head, struct process** tail) {
-	if (*head == NULL || *tail == NULL) {
-		return NULL;
-	}
-
-	struct process* res = *head;
-	*head = (*head)->next;
-	if (*head == NULL) {
-		*tail = NULL;
-	}
-	res->next = NULL;
-	return res;
+	printf("__________\n");
 }
 
 void ordonnance() {
 	// Wake up proces
-	while(sleeping_list_head != NULL && sleeping_list_head->wakeUpTime <= nbr_secondes()) {
+	
+	struct process* head;
+	display_list(&process_list);
+	while ((head = queue_out(&sleeping_list, struct process, links)) != NULL && head->wakeUpTime <= nbr_secondes()) {
 		struct process* toWakeUp;
-		toWakeUp = pick(&sleeping_list_head, &sleeping_list_tail);
-		insert(
-			toWakeUp,
-			&process_list_head,
-			&process_list_tail);
+		toWakeUp = head;
+		queue_add(toWakeUp, &process_list, struct process, links, prio);
 		toWakeUp->state = ACTIVABLE;
 		toWakeUp->wakeUpTime = -1;
 	}
 
 	// If there is something to activate
-	struct process* toChoose = pick(&process_list_head, &process_list_tail);
+	struct process* toChoose = queue_out(&process_list, struct process, links);
 	if (toChoose != NULL) {
 		struct process* formerChosen;
 		struct process* newChosen;
@@ -74,10 +47,7 @@ void ordonnance() {
 		// Insert chosen in tail of activable if not sleeping
 		if (chosen->state == CHOSEN) {
 			chosen->state = ACTIVABLE;
-			insert(
-				chosen,
-				&process_list_head,
-				&process_list_tail);
+			queue_add(chosen, &process_list, struct process, links, prio);
 		}
 		formerChosen = chosen;
 		newChosen = toChoose;
@@ -95,31 +65,33 @@ int32_t nbr_secondes() {
 
 void insertSleep(struct process* process) {
 	// If list empty
-	if (sleeping_list_head == NULL || sleeping_list_tail == NULL) {
-		sleeping_list_head = process;
-		sleeping_list_tail = process;
-		return;
-	}
-	if (process->wakeUpTime <= sleeping_list_head->wakeUpTime) {
-		process->next = sleeping_list_head;
-		sleeping_list_head = process;
-		return;
-	}
-	if (sleeping_list_tail->wakeUpTime <= process->wakeUpTime) {
-		sleeping_list_tail->next = process;
-		sleeping_list_tail = process;
-		return;
-	}
+	//if (sleeping_list_head == NULL || sleeping_list_tail == NULL) {
+	// 	sleeping_list_head = process;
+	// 	sleeping_list_tail = process;
+	// 	return;
+	// }
+	// if (process->wakeUpTime <= sleeping_list_head->wakeUpTime) {
+	// 	process->next = sleeping_list_head;
+	// 	sleeping_list_head = process;
+	// 	return;
+	// }
+	// if (sleeping_list_tail->wakeUpTime <= process->wakeUpTime) {
+	// 	sleeping_list_tail->next = process;
+	// 	sleeping_list_tail = process;
+	// 	return;
+	// }
+	
 
 	// insert at the right place
-	struct process* cour = sleeping_list_head;
-	struct process* prec;
-	while(cour->next != NULL && cour->wakeUpTime < process->wakeUpTime) {
-		prec = cour;
-		cour = cour->next;
-	}
-	prec->next = process;
-	process->next = cour;
+	// struct process* cour = sleeping_list_head;
+	// struct process* prec;
+	// while(cour->next != NULL && cour->wakeUpTime < process->wakeUpTime) {
+	// 	prec = cour;
+	// 	cour = cour->next;
+	// }
+	// prec->next = process;
+	// process->next = cour;
+	queue_add(process, &sleeping_list, struct process, links, wakeUpTime);
 }
 
 void dors(int nbr_secs) {
@@ -142,21 +114,25 @@ int32_t cree_processus(void (*code)(void), char *nom) {
 	if (pidmax < PROCESS_TABLE_SIZE) {
 		struct process* newprocess = (struct process*)malloc(sizeof(struct process));
 		
-		if (process_list_tail == NULL || process_list_head == NULL) {
+		//if (process_list_tail == NULL || process_list_head == NULL) {
+		if (queue_empty(&process_list)) {
 			newprocess->state = CHOSEN;
-			process_list_tail = newprocess;
-			process_list_head = newprocess;
+			// process_list_tail = newprocess;
+			// process_list_head = newprocess;
 		} else {
 			newprocess->state = ACTIVABLE;
-			process_list_tail->next = newprocess;
-			process_list_tail = newprocess;
+			// process_list_tail->next = newprocess;
+			// process_list_tail = newprocess;
 		}
+		
 		newprocess->pid = pidmax;
 		strcpy(newprocess->name, nom);
 		newprocess->process_stack[STACK_SIZE -1] = (int)code;
 		newprocess->register_save[1] = (int)&(newprocess->process_stack[STACK_SIZE - 1]);
-		newprocess->next = NULL;
 		newprocess->wakeUpTime = -1;
+
+		queue_add(newprocess, &process_list, struct process, links, prio);
+
 		return pidmax;
 	} else {
 
@@ -167,7 +143,7 @@ int32_t cree_processus(void (*code)(void), char *nom) {
 }
 
 
-void idle(void)
+ void idle(void)
 {
 	for (;;) {
 		sti();
@@ -176,36 +152,46 @@ void idle(void)
 	}
 }
 
-void proc1(void) {
-	for (;;) {
-		// printf(__FUNCTION__);
-		printf("[temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(), mon_pid());
-		dors(2);
+int tstA(void *arg)
+{
+	unsigned long i;
+	while (1) {
+		printf("I am in tstA\n"); /* l'autre processus doit afficher des 'B' */
+		/* boucle d'attente pour ne pas afficher trop de caractères */
+		for (i = 0; i < 5000000; i++); 
+		ordonnance();
 	}
 }
 
-void proc2(void) {
-	for (;;) {
-		// printf(__FUNCTION__);
-		printf("[temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(), mon_pid());
-		dors(3);
+int tstB(void *arg)
+{
+	unsigned long i;
+	while (1) {
+		printf("I am in tstB\n"); /* l'autre processus doit afficher des 'A' */
+		/* boucle d'attente pour ne pas afficher trop de caractères */
+		for (i = 0; i < 5000000; i++); 
+		ordonnance();		
 	}
 }
-void proc3(void) {
-	for (;;) {
-		// printf(__FUNCTION__);
-		printf("[temps = %u] processus %s pid = %i\n", nbr_secondes(), mon_nom(), mon_pid());
-		dors(5);
+
+int tstC(void *arg)
+{
+	unsigned long i;
+	while (1) {
+		printf("I am in tstC\n"); /* l'autre processus doit afficher des 'A' */
+		/* boucle d'attente pour ne pas afficher trop de caractères */
+		for (i = 0; i < 5000000; i++); 
+		ordonnance();		
 	}
 }
 
 void init_process_stack(void) {
 
-	cree_processus((void*)&idle, "idle");
-	cree_processus((void*)&proc1, "proc1");
-	cree_processus((void*)&proc2, "proc2");
-	cree_processus((void*)&proc3, "proc3");
+	cree_processus((void*)&tstA, "dumb_A");
+	cree_processus((void*)&tstB, "dumb_B");
+	cree_processus((void*)&tstC, "dumb_C");
 
-	chosen = pick(&process_list_head, &process_list_tail);
+	//chosen = pick(&process_list_head, &process_list_tail);
+	chosen = queue_out(&process_list, struct process, links);
 	
 }
