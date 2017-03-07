@@ -18,13 +18,18 @@ void maj_sleeping(int pid);
 int mon_pid();
 void dors(int nbr_secs);
 
+// SEMAPHORE
+void bloque_sur_semaphore();
+void passe_activable(int pid);
+
+
 struct process* process_list_head;
 struct process* process_list_tail;
 
 struct process* sleeping_list_head;
 struct process* sleeping_list_tail;
 
-typedef enum {CHOSEN, ACTIVABLE, SLEEPING} process_state;
+typedef enum {CHOSEN, ACTIVABLE, SLEEPING, BLOCKED_ON_SEM} process_state;
 
 struct process {
 	int pid;
