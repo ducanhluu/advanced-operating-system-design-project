@@ -1,4 +1,4 @@
-#ifndef MESSAGE_QUEUE_H_
+#ifndef MESSAGE_QUEUE_H
 #define MESSAGE_QUEUE_H_
 #include "mem.h"
 
