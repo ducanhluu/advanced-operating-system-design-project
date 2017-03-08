@@ -18,12 +18,17 @@ struct process* chosen = NULL;
 int pidmax = -1;
 
 void display_list(link* head) {
+	printf("DISPLAY\n");
+	if (chosen != NULL) {
+		printf("chosen : \n");
+		printf("%s [%d]\n", chosen->name, chosen->prio);
+	}
 	printf("process_list : \n");
 	struct process* cour;
 	queue_for_each(cour, head, struct process, links) {
 		printf("%s [%d]\n", cour->name, cour->prio);
 	}
-	printf("__________\n");
+	printf("__________\n\n");
 }
 
 void ordonnance() {
@@ -41,6 +46,7 @@ void ordonnance() {
 
 	// If there is something to activate
 	struct process* toChoose = queue_out(&process_list, struct process, links);
+	printf("Choosing %s...\n", toChoose->name);
 	if (toChoose != NULL) {
 		struct process* formerChosen;
 		struct process* newChosen;
@@ -65,33 +71,6 @@ int32_t nbr_secondes() {
 }
 
 void insertSleep(struct process* process) {
-	// If list empty
-	//if (sleeping_list_head == NULL || sleeping_list_tail == NULL) {
-	// 	sleeping_list_head = process;
-	// 	sleeping_list_tail = process;
-	// 	return;
-	// }
-	// if (process->wakeUpTime <= sleeping_list_head->wakeUpTime) {
-	// 	process->next = sleeping_list_head;
-	// 	sleeping_list_head = process;
-	// 	return;
-	// }
-	// if (sleeping_list_tail->wakeUpTime <= process->wakeUpTime) {
-	// 	sleeping_list_tail->next = process;
-	// 	sleeping_list_tail = process;
-	// 	return;
-	// }
-	
-
-	// insert at the right place
-	// struct process* cour = sleeping_list_head;
-	// struct process* prec;
-	// while(cour->next != NULL && cour->wakeUpTime < process->wakeUpTime) {
-	// 	prec = cour;
-	// 	cour = cour->next;
-	// }
-	// prec->next = process;
-	// process->next = cour;
 	queue_add(process, &sleeping_list, struct process, links, wakeUpTime);
 }
 
@@ -156,17 +135,19 @@ int32_t cree_processus(void (*code)(void), char *nom) {
 int tstA(void *arg)
 {
 	unsigned long i;
+	printf("%d", (int)arg);
 	while (1) {
-		printf("I am in tstA\n"); /* l'autre processus doit afficher des 'B' */
+		printf("I am in tstA\n"); /* l'autre processus doit afficher des 'A' */
 		/* boucle d'attente pour ne pas afficher trop de caractères */
 		for (i = 0; i < 5000000; i++); 
-		ordonnance();
+		ordonnance();		
 	}
 }
 
 int tstB(void *arg)
 {
 	unsigned long i;
+	printf("%d", (int)arg);
 	while (1) {
 		printf("I am in tstB\n"); /* l'autre processus doit afficher des 'A' */
 		/* boucle d'attente pour ne pas afficher trop de caractères */
@@ -178,6 +159,7 @@ int tstB(void *arg)
 int tstC(void *arg)
 {
 	unsigned long i;
+	printf("%d", (int)arg);
 	while (1) {
 		printf("I am in tstC\n"); /* l'autre processus doit afficher des 'A' */
 		/* boucle d'attente pour ne pas afficher trop de caractères */
@@ -192,41 +174,43 @@ void init_process_stack(void) {
 	cree_processus((void*)&tstB, "dumb_B");
 	cree_processus((void*)&tstC, "dumb_C");
 
-	//chosen = pick(&process_list_head, &process_list_tail);
+	display_list(&process_list);
+
 	chosen = queue_out(&process_list, struct process, links);
 	
 }
 
 void maj_sleeping(int pid) {
+	printf("%d", pid);
   //Remet wake up time à zero après réception d'un message
-  struct process* cour = sleeping_list_head;
-  struct process* proc;
-  if (cour == NULL) {
-    //erreur
-    printf("Process not found in sleeping list\n");
-  }
-  if (cour->pid == pid) {
-    proc = cour;
-    sleeping_list_head = cour->next;
-    if (cour->next == NULL) {
-      sleeping_list_tail = NULL;
-    }
-  } else {
-    while(cour->next != NULL && cour->next->pid!=pid) {
-      cour = cour->next;
-    }
-    if (cour->next == NULL) {
-      //erreur
-      printf("Process not found in sleeping list\n");
-    } 
-    proc = cour->next;
-    cour->next = proc->next;
-    if (proc->next == NULL) {
-      sleeping_list_tail = cour;
-    }
-  }
-  //Processus supprimé de la liste sleeping
-  proc->wakeUpTime = nbr_secondes();
-  insertSleep(chosen);
-  ordonnance();
+//   struct process* cour = sleeping_list_head;
+//   struct process* proc;
+//   if (cour == NULL) {
+//     //erreur
+//     printf("Process not found in sleeping list\n");
+//   }
+//   if (cour->pid == pid) {
+//     proc = cour;
+//     sleeping_list_head = cour->next;
+//     if (cour->next == NULL) {
+//       sleeping_list_tail = NULL;
+//     }
+//   } else {
+//     while(cour->next != NULL && cour->next->pid!=pid) {
+//       cour = cour->next;
+//     }
+//     if (cour->next == NULL) {
+//       //erreur
+//       printf("Process not found in sleeping list\n");
+//     } 
+//     proc = cour->next;
+//     cour->next = proc->next;
+//     if (proc->next == NULL) {
+//       sleeping_list_tail = cour;
+//     }
+//   }
+//   //Processus supprimé de la liste sleeping
+//   proc->wakeUpTime = nbr_secondes();
+//   insertSleep(chosen);
+//   ordonnance();
 }

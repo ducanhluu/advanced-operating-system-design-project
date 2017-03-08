@@ -44,3 +44,6 @@ go:
 
 gdb:
 	gdb -d kernel -ex "tar rem :1234" kernel/kernel.bin
+
+ddd:
+	ddd -d kernel -ex "tar rem :1234" kernel/kernel.bin

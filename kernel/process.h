@@ -2,6 +2,7 @@
 #define __PROCESS_H__
 
 #include "queue.h"
+#include <inttypes.h> 
 
 #define MAX_NAME_LENGTH 64
 #define STACK_SIZE 512
