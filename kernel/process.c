@@ -214,3 +214,20 @@ void maj_sleeping(int pid) {
 //   insertSleep(chosen);
 //   ordonnance();
 }
+
+// SEMAPHORE
+void bloque_sur_semaphore() {
+    chosen->state = BLOCKED_ON_SEM;
+    ordonnance();
+}
+
+void passe_activable(int pid) {
+    struct process* cour = process_list_head;
+    while(cour != NULL) {
+        if (cour->pid == pid) {
+            cour->state = ACTIVABLE;
+            break;
+        }
+        cour = cour->next;
+    }
+}
