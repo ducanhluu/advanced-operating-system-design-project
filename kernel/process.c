@@ -222,12 +222,11 @@ void bloque_sur_semaphore() {
 }
 
 void passe_activable(int pid) {
-    struct process* cour = process_list_head;
-    while(cour != NULL) {
-        if (cour->pid == pid) {
-            cour->state = ACTIVABLE;
-            break;
-        }
-        cour = cour->next;
-    }
+	struct process* cour;
+	queue_for_each(cour, &process_list, struct process, links) {
+		if (cour->pid == pid) {
+            		cour->state = ACTIVABLE;
+            		break;
+        	}
+	}
 }
