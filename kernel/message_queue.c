@@ -55,7 +55,7 @@ int pdelete(int fid) {
   }
    //Les processus bloqués deviennent activables
   for (int j = 0; j < queues[i]->nb_p_bloques; j++) {
-    maj_sleeping(queues[i]->p_bloques[j]);
+    unblock(queues[i]->p_bloques[j]);
   }
   nb_queue--;
   queues[i] = queues[nb_queue];
@@ -77,7 +77,7 @@ int preceive(int fid,int *message) {
     //état bloqué sur file vide
     queues[i]->nb_p_bloques++;
     queues[i]->p_bloques[queues[i]->nb_p_bloques+1]=mon_pid();
-    dors(100000);
+    block_recv(mon_pid());
   }
   if (queues[i]->nb_message > 0) {
     *message = queues[i]->messages[0];
@@ -88,7 +88,7 @@ int preceive(int fid,int *message) {
     if (queues[i]->nb_message == queues[i]->size_max - 1) {
       //la file était pleine
       if (queues[i]->nb_p_bloques > 0) {
-	maj_sleeping(queues[i]->p_bloques[0]);
+	unblock(queues[i]->p_bloques[0]);
 	queues[i]->nb_p_bloques--;
 	for (int j=0; j<queues[i]->nb_p_bloques; j++) {
 	  queues[i]->p_bloques[j] = queues[i]->p_bloques[j+1];
@@ -102,7 +102,7 @@ int preceive(int fid,int *message) {
   return 0;
 
   //TODO le truc avec chprio :
-  //Un processus bloqué sur file vide et dont la priorité est changée par chprio, est considéré comme le dernier processus (le plus jeune) de sa nouvelle priorité. 
+  //Un processus bloqué sur file vide et dont la priorité est changée par chprio, est considéré comme le dernier processus (le plus jeune) de sa nouvelle priorité.
 }
 
 
@@ -116,7 +116,7 @@ int preset(int fid) {
     return -1;
   }
   for (int j = 0; j < queues[i]->nb_p_bloques; j++) {
-    maj_sleeping(queues[i]->p_bloques[j]);
+    unblock(queues[i]->p_bloques[j]);
   }
   queues[i]->nb_p_bloques = 0;
   mem_free(queues[i]->p_bloques, PROCESS_TABLE_SIZE * sizeof(int));

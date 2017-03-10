@@ -36,7 +36,7 @@ void display_list(link* head) {
 
 void ordonnance() {
 	// Wake up proces
-	
+
 	struct process* head;
 	display_list(&process_list);
 	while ((head = queue_out(&sleeping_list, struct process, links)) != NULL && head->wakeUpTime <= nbr_secondes()) {
@@ -102,7 +102,7 @@ int32_t cree_processus(void (*code)(void), char *nom) {
 		} else {
 			newprocess->state = ACTIVABLE;
 		}
-		
+
 		newprocess->pid = pidmax;
 		strcpy(newprocess->name, nom);
 		newprocess->process_stack[STACK_SIZE -1] = (int)code;
@@ -190,40 +190,42 @@ void init_process_stack(void) {
 	chosen = queue_out(&process_list, struct process, links);
 }
 
-void maj_sleeping(int pid) {
-	printf("%d", pid);
-  //Remet wake up time à zero après réception d'un message
-//   struct process* cour = sleeping_list_head;
-//   struct process* proc;
-//   if (cour == NULL) {
-//     //erreur
-//     printf("Process not found in sleeping list\n");
-//   }
-//   if (cour->pid == pid) {
-//     proc = cour;
-//     sleeping_list_head = cour->next;
-//     if (cour->next == NULL) {
-//       sleeping_list_tail = NULL;
-//     }
-//   } else {
-//     while(cour->next != NULL && cour->next->pid!=pid) {
-//       cour = cour->next;
-//     }
-//     if (cour->next == NULL) {
-//       //erreur
-//       printf("Process not found in sleeping list\n");
-//     } 
-//     proc = cour->next;
-//     cour->next = proc->next;
-//     if (proc->next == NULL) {
-//       sleeping_list_tail = cour;
-//     }
-//   }
-//   //Processus supprimé de la liste sleeping
-//   proc->wakeUpTime = nbr_secondes();
-//   insertSleep(chosen);
-//   ordonnance();
+void unblock(int pid) {
+  struct process* cour;
+	queue_for_each(cour, &process_list, struct process, links) {
+		if (cour->pid == pid && (cour->state == BLOCKED_ON_MSG_RCV || cour->state == BLOCKED_ON_MSG_SEND)) {
+			cour->state = ACTIVABLE;
+			ordonnance();
+			return;
+		}
+	}
+	printf("Process %d not blocked\n", pid);
 }
+
+void block_send(int pid){
+	struct process* cour;
+	queue_for_each(cour, &process_list, struct process, links) {
+		if (cour->pid == pid) {
+			cour->state = BLOCKED_ON_MSG_SEND;
+			ordonnance();
+		  return;
+		}
+	}
+	printf("Process %d not found\n", pid);
+}
+
+void block_recv(int pid){
+	struct process* cour;
+	queue_for_each(cour, &process_list, struct process, links) {
+		if (cour->pid == pid) {
+			cour->state = BLOCKED_ON_MSG_RCV;
+			ordonnance();
+		  return;
+		}
+	}
+	printf("Process %d not found\n", pid);
+}
+
 
 // SEMAPHORE
 void bloque_sur_semaphore() {

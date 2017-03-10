@@ -35,7 +35,7 @@ void kernel_start(void)
 
         init_process_stack();
         idle();
-        
+
 	// Unmask external IT
 	/* sti(); */
 	// on ne doit jamais sortir de kernel_start
