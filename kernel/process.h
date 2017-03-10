@@ -5,7 +5,7 @@
 #include <inttypes.h> 
 
 #define MAX_NAME_LENGTH 64
-#define STACK_SIZE 512
+#define STACK_SIZE 8192
 #define PROCESS_TABLE_SIZE 5
 
 void idle();

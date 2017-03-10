@@ -28,6 +28,9 @@ void display_list(link* head) {
 	queue_for_each(cour, head, struct process, links) {
 		printf("%s [%d]\n", cour->name, cour->prio);
 	}
+	printf("head : \n");
+	if (!queue_empty(&process_list))
+	printf("%s\n",((struct process*)queue_top(&process_list, struct process, links))->name);
 	printf("__________\n\n");
 }
 
@@ -46,8 +49,8 @@ void ordonnance() {
 
 	// If there is something to activate
 	struct process* toChoose = queue_out(&process_list, struct process, links);
-	printf("Choosing %s...\n", toChoose->name);
 	if (toChoose != NULL) {
+		printf("Choosing %s...\n", toChoose->name);
 		struct process* formerChosen;
 		struct process* newChosen;
 
@@ -94,15 +97,10 @@ int32_t cree_processus(void (*code)(void), char *nom) {
 	if (pidmax < PROCESS_TABLE_SIZE) {
 		struct process* newprocess = (struct process*)malloc(sizeof(struct process));
 		
-		//if (process_list_tail == NULL || process_list_head == NULL) {
 		if (queue_empty(&process_list)) {
 			newprocess->state = CHOSEN;
-			// process_list_tail = newprocess;
-			// process_list_head = newprocess;
 		} else {
 			newprocess->state = ACTIVABLE;
-			// process_list_tail->next = newprocess;
-			// process_list_tail = newprocess;
 		}
 		
 		newprocess->pid = pidmax;
@@ -123,7 +121,7 @@ int32_t cree_processus(void (*code)(void), char *nom) {
 }
 
 
- void idle(void)
+void idle(void)
 {
 	for (;;) {
 		sti();
@@ -135,11 +133,11 @@ int32_t cree_processus(void (*code)(void), char *nom) {
 int tstA(void *arg)
 {
 	unsigned long i;
-	printf("%d", (int)arg);
+	(void)arg;
 	while (1) {
-		printf("I am in tstA\n"); /* l'autre processus doit afficher des 'A' */
+		printf("I am in A\n"); /* l'autre processus doit afficher des 'A' */
 		/* boucle d'attente pour ne pas afficher trop de caractères */
-		for (i = 0; i < 5000000; i++); 
+		for (i = 0; i < 50000000; i++){}; 
 		ordonnance();		
 	}
 }
@@ -147,11 +145,11 @@ int tstA(void *arg)
 int tstB(void *arg)
 {
 	unsigned long i;
-	printf("%d", (int)arg);
+	(void)arg;
 	while (1) {
-		printf("I am in tstB\n"); /* l'autre processus doit afficher des 'A' */
+		printf("I am in B\n"); /* l'autre processus doit afficher des 'A' */
 		/* boucle d'attente pour ne pas afficher trop de caractères */
-		for (i = 0; i < 5000000; i++); 
+		for (i = 0; i < 50000000; i++){}; 
 		ordonnance();		
 	}
 }
@@ -159,11 +157,23 @@ int tstB(void *arg)
 int tstC(void *arg)
 {
 	unsigned long i;
-	printf("%d", (int)arg);
+	(void)arg;
 	while (1) {
-		printf("I am in tstC\n"); /* l'autre processus doit afficher des 'A' */
+		printf("I am in C\n"); /* l'autre processus doit afficher des 'A' */
 		/* boucle d'attente pour ne pas afficher trop de caractères */
-		for (i = 0; i < 5000000; i++); 
+		for (i = 0; i < 50000000; i++){}; 
+		ordonnance();		
+	}
+}
+
+int tstD(void *arg)
+{
+	unsigned long i;
+	(void)arg;
+	while (1) {
+		printf("I am in D\n"); /* l'autre processus doit afficher des 'A' */
+		/* boucle d'attente pour ne pas afficher trop de caractères */
+		for (i = 0; i < 50000000; i++){}; 
 		ordonnance();		
 	}
 }
@@ -173,11 +183,11 @@ void init_process_stack(void) {
 	cree_processus((void*)&tstA, "dumb_A");
 	cree_processus((void*)&tstB, "dumb_B");
 	cree_processus((void*)&tstC, "dumb_C");
+	cree_processus((void*)&tstD, "dumb_D");
 
 	display_list(&process_list);
 
 	chosen = queue_out(&process_list, struct process, links);
-	
 }
 
 void maj_sleeping(int pid) {
