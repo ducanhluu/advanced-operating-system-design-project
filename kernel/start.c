@@ -14,15 +14,7 @@ int fact(int n)
 	return n * fact(n-1);
 }
 
-
-void kernel_start(void)
-{
-        cli();
-	set_clock_fqc();
-	init_traitant_IT(32, &traitant_IT_32);
-	masque_IRQ(0,0);
-
-	start("autotest", 4000, 128, NULL);
+void kernel_start(void) {
 
 	cli();
 	set_clock_fqc();
@@ -33,17 +25,13 @@ void kernel_start(void)
 
 	printf("group_14@awsome_pc:~$\n");
 
-        init_process_stack();
-        idle();
-
-	// Unmask external IT
-	/* sti(); */
+	init_process_stack();
+	
+	sti();
+	idle();
 	// on ne doit jamais sortir de kernel_start
 	while (1) {
 		// cette fonction arrete le processeur
 		hlt();
 	}
-
-
-	return;
 }

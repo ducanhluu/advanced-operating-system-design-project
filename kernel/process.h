@@ -19,16 +19,12 @@ int mon_pid();
 void block_send(int pid);
 void block_recv(int pid);
 
+int start (const car *name, unsigned long ssiz, int prio, void *arg);
+
 // SEMAPHORE
 void bloque_sur_semaphore();
 void passe_activable(int pid);
 
-
-//struct process* process_list_head;
-//struct process* process_list_tail;
-
-//struct process* sleeping_list_head;
-//struct process* sleeping_list_tail;
 
 typedef enum {CHOSEN, ACTIVABLE, SLEEPING, BLOCKED_ON_SEM, BLOCKED_ON_MSG_SEND, BLOCKED_ON_MSG_RCV} process_state;
 

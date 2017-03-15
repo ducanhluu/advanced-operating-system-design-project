@@ -35,53 +35,22 @@ void display_list(link* head) {
 }
 
 void ordonnance() {
-	// Wake up proces
-
-	struct process* head;
-	display_list(&process_list);
-	while ((head = queue_out(&sleeping_list, struct process, links)) != NULL && head->wakeUpTime <= nbr_secondes()) {
-		struct process* toWakeUp;
-		toWakeUp = head;
-		queue_add(toWakeUp, &process_list, struct process, links, prio);
-		toWakeUp->state = ACTIVABLE;
-		toWakeUp->wakeUpTime = -1;
-	}
-
-	// If there is something to activate
+	//	display_list(&process_list);
 	struct process* toChoose = queue_out(&process_list, struct process, links);
 	if (toChoose != NULL) {
-		printf("Choosing %s...\n", toChoose->name);
-		struct process* formerChosen;
-		struct process* newChosen;
-
-		// Insert chosen in tail of activable if not sleeping
+		toChoose->state = CHOSEN;
 		if (chosen->state == CHOSEN) {
 			chosen->state = ACTIVABLE;
 			queue_add(chosen, &process_list, struct process, links, prio);
 		}
-		formerChosen = chosen;
-		newChosen = toChoose;
-
+		struct process* former = chosen;
 		chosen = toChoose;
-		chosen->state = CHOSEN;
-
-		ctx_sw(formerChosen->register_save, newChosen->register_save);
+		ctx_sw(former->register_save, chosen->register_save);
 	}
 }
 
 int32_t nbr_secondes() {
 	return (int32_t)time;
-}
-
-void insertSleep(struct process* process) {
-	queue_add(process, &sleeping_list, struct process, links, wakeUpTime);
-}
-
-void dors(int nbr_secs) {
-	chosen->state = SLEEPING;
-	chosen->wakeUpTime = nbr_secondes() + nbr_secs;
-	insertSleep(chosen);
-	ordonnance();
 }
 
 char* mon_nom() {
@@ -92,10 +61,16 @@ int mon_pid() {
 	return chosen->pid;
 }
 
-int32_t cree_processus(void (*code)(void), char *nom) {
+
+	
+
+	
+
+int start (const char *name, unsigned long ssize, int prio, void *arg) {
+	//int32_t cree_processus(void (*code)(void), char *nom) {
 	pidmax++;
 	if (pidmax < PROCESS_TABLE_SIZE) {
-		struct process* newprocess = (struct process*)malloc(sizeof(struct process));
+		struct process* newprocess = (struct process*)mem_alloc(sizeof(struct process));
 		
 		if (queue_empty(&process_list)) {
 			newprocess->state = CHOSEN;
@@ -105,9 +80,11 @@ int32_t cree_processus(void (*code)(void), char *nom) {
 
 		newprocess->pid = pidmax;
 		strcpy(newprocess->name, nom);
-		newprocess->process_stack[STACK_SIZE -1] = (int)code;
+		//newprocess->process_stack[STACK_SIZE -1] = (int)code;
+		newprocess->process_stack[ssize -1] = (int)code;
 		newprocess->register_save[1] = (int)&(newprocess->process_stack[STACK_SIZE - 1]);
 		newprocess->wakeUpTime = -1;
+		newprocess->prio = prio;
 
 		queue_add(newprocess, &process_list, struct process, links, prio);
 
@@ -132,54 +109,49 @@ void idle(void)
 
 int tstA(void *arg)
 {
-	unsigned long i;
 	(void)arg;
-	while (1) {
+	for (;;) {
 		printf("I am in A\n"); /* l'autre processus doit afficher des 'A' */
 		/* boucle d'attente pour ne pas afficher trop de caractères */
-		for (i = 0; i < 50000000; i++){}; 
-		ordonnance();		
+		for (int i = 0; i < 1000000; i++){};
+		
 	}
 }
 
 int tstB(void *arg)
 {
-	unsigned long i;
 	(void)arg;
-	while (1) {
+	for (;;) {
 		printf("I am in B\n"); /* l'autre processus doit afficher des 'A' */
 		/* boucle d'attente pour ne pas afficher trop de caractères */
-		for (i = 0; i < 50000000; i++){}; 
-		ordonnance();		
+		for (int i = 0; i < 1000000; i++){};
 	}
 }
 
 int tstC(void *arg)
 {
-	unsigned long i;
 	(void)arg;
-	while (1) {
+	for (;;) {
 		printf("I am in C\n"); /* l'autre processus doit afficher des 'A' */
 		/* boucle d'attente pour ne pas afficher trop de caractères */
-		for (i = 0; i < 50000000; i++){}; 
-		ordonnance();		
+		for (int i = 0; i < 1000000; i++){};
 	}
 }
 
 int tstD(void *arg)
 {
-	unsigned long i;
 	(void)arg;
-	while (1) {
+	for (;;) {
 		printf("I am in D\n"); /* l'autre processus doit afficher des 'A' */
 		/* boucle d'attente pour ne pas afficher trop de caractères */
-		for (i = 0; i < 50000000; i++){}; 
-		ordonnance();		
+		for (int i = 0; i < 1000000; i++){};
 	}
 }
 
 void init_process_stack(void) {
 
+
+	cree_processus((void*)&idle, "idle");
 	cree_processus((void*)&tstA, "dumb_A");
 	cree_processus((void*)&tstB, "dumb_B");
 	cree_processus((void*)&tstC, "dumb_C");
