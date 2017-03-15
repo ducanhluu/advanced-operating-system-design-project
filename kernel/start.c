@@ -1,10 +1,12 @@
 #include "debugger.h"
 #include "cpu.h"
 #include "console.h"
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include "time.h"
 #include "process.h"
 #include "sem.h"
+#include "tests.h"
 
 int fact(int n)
 {
@@ -25,11 +27,13 @@ void kernel_start(void) {
 
 	printf("group_14@awsome_pc:~$\n");
 
-	init_process_stack();
 	
-	sti();
-	idle();
 	// on ne doit jamais sortir de kernel_start
+
+	int i;
+	test0(&i);
+
+
 	while (1) {
 		// cette fonction arrete le processeur
 		hlt();
