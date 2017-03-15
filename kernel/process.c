@@ -61,13 +61,8 @@ int mon_pid() {
 	return chosen->pid;
 }
 
-
-	
-
-	
-
-int start (const char *name, unsigned long ssize, int prio, void *arg) {
-	//int32_t cree_processus(void (*code)(void), char *nom) {
+int start (void (*code)(void), const char *nom, unsigned long ssize, int prio, void *arg) {
+	//int32_t start(void (*code)(void), char *nom) {
 	pidmax++;
 	if (pidmax < PROCESS_TABLE_SIZE) {
 		struct process* newprocess = (struct process*)mem_alloc(sizeof(struct process));
@@ -80,6 +75,8 @@ int start (const char *name, unsigned long ssize, int prio, void *arg) {
 
 		newprocess->pid = pidmax;
 		strcpy(newprocess->name, nom);
+		newprocess->process_stack = (int*)mem_alloc(ssize * sizeof(int));
+		(void)arg;
 		//newprocess->process_stack[STACK_SIZE -1] = (int)code;
 		newprocess->process_stack[ssize -1] = (int)code;
 		newprocess->register_save[1] = (int)&(newprocess->process_stack[STACK_SIZE - 1]);
@@ -151,11 +148,11 @@ int tstD(void *arg)
 void init_process_stack(void) {
 
 
-	cree_processus((void*)&idle, "idle");
-	cree_processus((void*)&tstA, "dumb_A");
-	cree_processus((void*)&tstB, "dumb_B");
-	cree_processus((void*)&tstC, "dumb_C");
-	cree_processus((void*)&tstD, "dumb_D");
+	start((void*)&idle, "idle", 1024, 512, NULL);
+	start((void*)&tstA, "dumb_A", 1024, 512, NULL);
+	start((void*)&tstB, "dumb_B", 1024, 512, NULL);
+	start((void*)&tstC, "dumb_C", 1024, 512, NULL);
+	start((void*)&tstD, "dumb_D", 1024, 512, NULL);
 
 	display_list(&process_list);
 

@@ -19,7 +19,7 @@ int mon_pid();
 void block_send(int pid);
 void block_recv(int pid);
 
-int start (const car *name, unsigned long ssiz, int prio, void *arg);
+int start (void (*code)(void), const char *nom, unsigned long ssize, int prio, void *arg);
 
 // SEMAPHORE
 void bloque_sur_semaphore();
@@ -35,7 +35,7 @@ struct process {
 	char name[MAX_NAME_LENGTH];
 	process_state state;
 	int register_save[5];
-	int process_stack[STACK_SIZE];
+	int* process_stack;
 	int wakeUpTime;
 };
 
