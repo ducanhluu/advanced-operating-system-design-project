@@ -21,7 +21,7 @@ struct sem *sem_courant(int sem) {
 void add_proc_bloque(struct sem *cou, int pid) {
     struct procs_bloques *c = cou->p_bloques;
     if (c == NULL) {
-        c = mem_alloc(sizeof(struct procs_bloques));
+        c = (struct procs_bloques *)mem_alloc(sizeof(struct procs_bloques));
         c->pid = pid;
         c->next = NULL;
     } else {
@@ -63,7 +63,7 @@ int screate(short count) {
     }
 
     if (sems == NULL) {
-        sems = mem_alloc(sizeof(struct sem));
+        sems = (struct sem *)mem_alloc(sizeof(struct sem));
         sems->sid = nb_sem - 1;
         sems->val = count;
         sems->next = NULL;
@@ -72,10 +72,13 @@ int screate(short count) {
     } else {
         struct sem *cou = sems;
 
-        while (cou != NULL) {
+        while (cou->next != NULL) {
             cou = cou->next;
         }
-        cou->sid = nb_sem - 1;
+	
+	cou->next = (struct sem *)mem_alloc(sizeof(struct sem));
+	cou = cou->next;
+	cou->sid = nb_sem - 1;
         cou->val = count;
         cou->next = NULL;
         cou->p_bloques = NULL;
