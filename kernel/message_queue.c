@@ -1,6 +1,4 @@
 #include "message_queue.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include "../shared/stddef.h"
 #include "process.h"
 
@@ -19,9 +17,9 @@ int pcount(int fid, int *count){
   }
   if (count != NULL) {
     if (queues[i]->nb_message == 0) {
-      return - queues[i]->nb_p_bloques;
+      *count = - queues[i]->nb_p_bloques;
     }
-    return queues[i]->nb_message + queues[i]->nb_p_bloques;
+    *count = queues[i]->nb_message + queues[i]->nb_p_bloques;
   }
   return 0;
  }
