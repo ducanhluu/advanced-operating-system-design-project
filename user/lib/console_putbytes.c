@@ -4,7 +4,6 @@
  *
  * Stub for console_putbytes system call.
  */
-#include "sysapi.h"
 
 void console_putbytes(const char *s, int len) {
         
