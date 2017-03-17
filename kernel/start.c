@@ -16,6 +16,7 @@ int fact(int n)
 	return n * fact(n-1);
 }
 
+void kernel_start(void) {
 
 void kernel_start(void)
 {
@@ -43,7 +44,4 @@ void kernel_start(void)
 		// cette fonction arrete le processeur
 		hlt();
 	}
-
-
-	return;
 }

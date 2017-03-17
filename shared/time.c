@@ -22,6 +22,8 @@ void display_corner(char* time) {
 
 
 void tic_PIT() {
+	cli();
+	printf("\n---TICK---\n\n");
 	outb(0x20, 0x20);
 	/* Do stuff */
 	static int ticks = 0;
@@ -40,8 +42,8 @@ void tic_PIT() {
 
 	char timestring[8];
 	sprintf(timestring,"%02d:%02d:%02d", hr, min, sec);
-	
-	ordonnance();
+	sti();	
+	ordonnance();	
 	display_corner(timestring);
 }
 
