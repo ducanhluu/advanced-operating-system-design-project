@@ -18,21 +18,27 @@ int fact(int n)
 
 void kernel_start(void) {
 
-	cli();
+void kernel_start(void)
+{
+        cli();
 	set_clock_fqc();
 	init_traitant_IT(32, &traitant_IT_32);
 	masque_IRQ(0,0);
 
+	//start("autotest", 4000, 128, NULL);
+
 	printf("\f");
 
 	printf("group_14@awsome_pc:~$\n");
+	test0();
+	test10_sem();
+	test15_sem();
+        init_process_stack();
+        //idle();
 
-	
+	// Unmask external IT
+	/* sti(); */
 	// on ne doit jamais sortir de kernel_start
-
-	int i;
-	test0(&i);
-
 
 	while (1) {
 		// cette fonction arrete le processeur

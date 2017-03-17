@@ -1,9 +1,8 @@
-#include "debugger.h"
-#include "cpu.h"
-#include "console.h"
-#include "stdio.h"
-#include "time.h"
-#include "process.h"
-#include "sem.h"
+#ifndef __TESTS_H__
+#define __TESTS_H__
 
-int test0(void* arg);
+
+void test0();
+void test10_sem();
+void test15_sem();
+#endif
