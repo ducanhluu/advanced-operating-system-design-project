@@ -14,6 +14,7 @@ void init_process_stack();
 void ordonnance();
 int32_t nbr_secondes();
 void ctx_sw(int* old, int* new);
+void hdl_ret();
 void unblock(int pid);
 int mon_pid();
 void block_send(int pid);

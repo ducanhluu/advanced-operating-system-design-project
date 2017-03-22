@@ -1,5 +1,5 @@
-.text
-.globl hdl_ret
+	.text
+	.globl hdl_ret
 hdl_ret:
-push %eax
-ret
+	push %eax
+	ret

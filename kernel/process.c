@@ -76,7 +76,6 @@ int32_t cree_process(void (*code)(void), const char *nom, unsigned long ssize, i
 		newprocess->pid = pidmax;
 		strcpy(newprocess->name, nom);
 		newprocess->process_stack = (int*)mem_alloc(ssize * sizeof(int));
-		(void)arg;
 		//newprocess->process_stack[STACK_SIZE -1] = (int)code;
 		newprocess->process_stack[ssize -1] = (int)code;// CODE FONCTION
 		newprocess->process_stack[ssize -2] = (int)hdl_ret; // ADR RETOUR
