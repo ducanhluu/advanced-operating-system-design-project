@@ -6,7 +6,7 @@
 
 #define MAX_NAME_LENGTH 64
 #define STACK_SIZE 8192
-#define PROCESS_TABLE_SIZE 5
+#define PROCESS_TABLE_SIZE 10
 
 void idle();
 void proc1();
@@ -19,7 +19,7 @@ int mon_pid();
 void block_send(int pid);
 void block_recv(int pid);
 
-int start (void (*code)(void), const char *nom, unsigned long ssize, int prio, void *arg);
+int32_t cree_process(void (*code)(void), const char *nom, unsigned long ssize, int prio, void *arg);
 
 // SEMAPHORE
 void bloque_sur_semaphore();
