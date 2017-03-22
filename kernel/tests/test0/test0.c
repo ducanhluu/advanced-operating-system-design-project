@@ -6,7 +6,7 @@
 
 #include "sysapi.h"
 
-int main(void *arg)
+int test0(void *arg)
 {
         (void)arg;
         register unsigned reg1 = 1u;
