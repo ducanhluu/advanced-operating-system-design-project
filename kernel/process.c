@@ -35,7 +35,7 @@ void display_list(link* head) {
 }
 
 void ordonnance() {
-	//	display_list(&process_list);
+  //display_list(&process_list);
 	struct process* toChoose = queue_out(&process_list, struct process, links);
 	if (toChoose != NULL) {
 		toChoose->state = CHOSEN;
@@ -88,7 +88,11 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 		newprocess->register_save[1] = (int)&(newprocess->process_stack[ssize - 3]);
 		newprocess->wakeUpTime = -1;
 		newprocess->prio = prio;
-
+		///////////////////////////////
+		if (chosen != NULL) {
+		  newprocess->parent_pid = chosen->pid;
+		}
+		///////////////////////////////
 		queue_add(newprocess, &process_list, struct process, links, prio);
 
 		return pidmax;
@@ -156,7 +160,7 @@ int tstD(void *arg)
 void init_process_stack(void) {
 
 
-	start(idle, "idle", 1024, 512, NULL);
+	start(idle, "idle", 1024, 128, NULL);
 	/* cree_process((void*)&tstA, "dumb_A", 1024, 512, NULL); */
 	/* cree_process((void*)&tstB, "dumb_B", 1024, 512, NULL); */
 	/* cree_process((void*)&tstC, "dumb_C", 1024, 512, NULL); */
@@ -213,6 +217,19 @@ void exit(int retval) {
    for (;;){}
 }
 
+int waitpid(int pid, int *retvalp) {
+  if (pid < 0) {
+    //TODO
+  } else if (pid > 0) {
+    //TODO
+    *retvalp = 0;
+    return pid;
+  } else {
+    //TODO
+  }
+  return -1;
+}
+  
 // SEMAPHORE
 void bloque_sur_semaphore() {
     chosen->state = BLOCKED_ON_SEM;

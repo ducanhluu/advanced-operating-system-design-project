@@ -29,7 +29,7 @@ void kernel_start(void) {
 	printf("group_14@awsome_pc:~$\n");
         init_process_stack();
 
-	start(test0, "test0", 1024, 512, NULL);
+	start(test1, "test1", 1024, 128, NULL);
 	
         idle(NULL);
 

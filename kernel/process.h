@@ -23,10 +23,12 @@ void block_recv(int pid);
 // PRIMITIVES SYSTEMES
 int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int prio, void *arg);
 void exit(int retval);
+int waitpid(int pid, int *retvalp);
 
 // SEMAPHORE
 void bloque_sur_semaphore();
 void passe_activable(int pid);
+
 
 
 typedef enum {CHOSEN, ACTIVABLE, SLEEPING, BLOCKED_ON_SEM, BLOCKED_ON_MSG_SEND, BLOCKED_ON_MSG_RCV, ZOMBIE} process_state;
@@ -41,6 +43,7 @@ struct process {
   int* process_stack;
   int wakeUpTime;
   int retval;
+  int parent_pid;
 };
 
 #endif
