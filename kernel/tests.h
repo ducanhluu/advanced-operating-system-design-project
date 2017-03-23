@@ -2,7 +2,7 @@
 #define __TESTS_H__
 
 
-void test0();
+int test0(void *arg);
 void test10_sem();
 void test15_sem();
 #endif

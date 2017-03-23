@@ -29,9 +29,9 @@ void kernel_start(void) {
 	printf("group_14@awsome_pc:~$\n");
         init_process_stack();
 
-	cree_process(test0, "test0", 1024, 512, NULL);
+	start(test0, "test0", 1024, 512, NULL);
 	
-        idle();
+        idle(NULL);
 
 	// Unmask external IT
 	sti();

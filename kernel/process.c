@@ -61,8 +61,13 @@ int mon_pid() {
 	return chosen->pid;
 }
 
+void hdl_ret() {
+    register int eax __asm__("eax");
+    exit(eax);
+}
+
 //int start (void (*code)(void), const char *nom, unsigned long ssize, int prio, void *arg) {
-int32_t cree_process(void (*code)(void), const char *nom, unsigned long ssize, int prio, void *arg) {
+int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int prio, void *arg) {
 	pidmax++;
 	if (pidmax < PROCESS_TABLE_SIZE) {
 		struct process* newprocess = (struct process*)mem_alloc(sizeof(struct process));
@@ -77,10 +82,10 @@ int32_t cree_process(void (*code)(void), const char *nom, unsigned long ssize, i
 		strcpy(newprocess->name, nom);
 		newprocess->process_stack = (int*)mem_alloc(ssize * sizeof(int));
 		//newprocess->process_stack[STACK_SIZE -1] = (int)code;
-		newprocess->process_stack[ssize -1] = (int)code;// CODE FONCTION
-		newprocess->process_stack[ssize -2] = (int)hdl_ret; // ADR RETOUR
-		newprocess->process_stack[ssize -3] = (int)arg; // ARG
-		newprocess->register_save[1] = (int)&(newprocess->process_stack[ssize - 1]);
+		newprocess->process_stack[ssize - 3] = (int)code;// CODE FONCTION
+		newprocess->process_stack[ssize - 2] = (int)hdl_ret; // ADR RETOUR
+		newprocess->process_stack[ssize - 1] = (int)arg; // ARG
+		newprocess->register_save[1] = (int)&(newprocess->process_stack[ssize - 3]);
 		newprocess->wakeUpTime = -1;
 		newprocess->prio = prio;
 
@@ -96,13 +101,15 @@ int32_t cree_process(void (*code)(void), const char *nom, unsigned long ssize, i
 }
 
 
-void idle(void)
+int idle(void *arg)
 {
+  (void)arg; 
 	for (;;) {
 		sti();
 		hlt();
 		cli();
 	}
+	return 0;
 }
 
 int tstA(void *arg)
@@ -149,7 +156,7 @@ int tstD(void *arg)
 void init_process_stack(void) {
 
 
-	cree_process((void*)&idle, "idle", 1024, 512, NULL);
+	start(idle, "idle", 1024, 512, NULL);
 	/* cree_process((void*)&tstA, "dumb_A", 1024, 512, NULL); */
 	/* cree_process((void*)&tstB, "dumb_B", 1024, 512, NULL); */
 	/* cree_process((void*)&tstC, "dumb_C", 1024, 512, NULL); */
@@ -196,6 +203,15 @@ void block_recv(int pid){
 	printf("Process %d not found\n", pid);
 }
 
+// PRIMITIVES SYSTEMES
+
+void exit(int retval) {
+   chosen->retval = retval;
+   chosen->state = ZOMBIE;
+   ordonnance();
+  
+   for (;;){}
+}
 
 // SEMAPHORE
 void bloque_sur_semaphore() {
