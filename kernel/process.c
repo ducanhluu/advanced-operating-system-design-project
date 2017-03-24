@@ -217,6 +217,19 @@ void exit(int retval) {
    for (;;){}
 }
 
+int kill(int pid) {
+  struct process* cour;
+  queue_for_each(cour, &process_list, struct process, links) {
+    if (cour->pid == pid) {
+      cour->state = ZOMBIE;
+      ordonnance();
+      return 0;
+    }
+  }
+  //process non trouvé
+  return -1;
+}
+
 int waitpid(int pid, int *retvalp) {
   if (pid < 0) {
     //TODO

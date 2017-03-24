@@ -23,6 +23,7 @@ void block_recv(int pid);
 // PRIMITIVES SYSTEMES
 int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int prio, void *arg);
 void exit(int retval);
+int kill(int pid);
 int waitpid(int pid, int *retvalp);
 
 // SEMAPHORE
