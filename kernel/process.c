@@ -57,7 +57,7 @@ char* mon_nom() {
 	return chosen->name;
 }
 
-int mon_pid() {
+int getpid() {
 	return chosen->pid;
 }
 

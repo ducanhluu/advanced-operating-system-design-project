@@ -16,7 +16,7 @@ int32_t nbr_secondes();
 void ctx_sw(int* old, int* new);
 
 void unblock(int pid);
-int mon_pid();
+int getpid();
 void block_send(int pid);
 void block_recv(int pid);
 

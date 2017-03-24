@@ -74,8 +74,8 @@ int preceive(int fid,int *message) {
   if (queues[i]->nb_message == 0) {
     //état bloqué sur file vide
     queues[i]->nb_p_bloques++;
-    queues[i]->p_bloques[queues[i]->nb_p_bloques+1]=mon_pid();
-    block_recv(mon_pid());
+    queues[i]->p_bloques[queues[i]->nb_p_bloques+1]=getpid();
+    block_recv(getpid());
   }
   if (queues[i]->nb_message > 0) {
     *message = queues[i]->messages[0];

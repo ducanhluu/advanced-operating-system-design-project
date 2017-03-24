@@ -214,7 +214,7 @@ int wait(int sem) {
     int estBloque = 0;
     if (cou->val < 0) {
         // Processus passe de l'état actif à l'état bloqué sur le sémaphore sem
-        add_proc_bloque(cou, mon_pid());
+        add_proc_bloque(cou, getpid());
         bloque_sur_semaphore();
         estBloque = 1;
     }

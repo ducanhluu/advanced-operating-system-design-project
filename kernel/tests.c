@@ -119,7 +119,7 @@ int test2(void *arg)
         r = waitpid(pid1, &rval);
         assert(rval == val);
         assert(r == pid1);
-        assert(waitpid(mon_pid(), &rval) < 0); //TODO mon_pid -> getpid
+        assert(waitpid(getpid(), &rval) < 0); 
         printf(" 7.\n");
         return 0;
 }
