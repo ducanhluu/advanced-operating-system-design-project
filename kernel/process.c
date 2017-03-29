@@ -10,8 +10,8 @@
 #include "../shared/malloc.c"
 
 LIST_HEAD(process_list);
-
 LIST_HEAD(sleeping_list);
+LIST_HEAD(toKill_list);
 
 struct process* chosen = NULL;
 
@@ -20,28 +20,33 @@ int pidmax = -1;
 void display_list(link* head) {
 	printf("DISPLAY\n");
 	if (chosen != NULL) {
-		printf("chosen : \n");
-		printf("%s [%d]\n", chosen->name, chosen->prio);
+		printf("## chosen : \n");
+		printf("   %s [PID=%d]\n", chosen->name, chosen->pid);
 	}
-	printf("process_list : \n");
+	printf("## Process_list : \n");
 	struct process* cour;
 	queue_for_each(cour, head, struct process, links) {
-		printf("%s [%d]\n", cour->name, cour->prio);
+		printf("   %s [PID=%d]\n", cour->name, cour->pid);
 	}
-	printf("head : \n");
-	if (!queue_empty(&process_list))
-	printf("%s\n",((struct process*)queue_top(&process_list, struct process, links))->name);
+	printf("## Head : \n");
+	if (!queue_empty(&process_list)) {
+		struct process* head = ((struct process*)queue_top(&process_list, struct process, links));
+		printf("   %s [PID=%d]\n",head->name, head->pid);
+	}
 	printf("__________\n\n");
 }
 
 void ordonnance() {
-  //display_list(&process_list);
 	struct process* toChoose = queue_out(&process_list, struct process, links);
 	if (toChoose != NULL) {
 		toChoose->state = CHOSEN;
 		if (chosen->state == CHOSEN) {
 			chosen->state = ACTIVABLE;
 			queue_add(chosen, &process_list, struct process, links, prio);
+		} else if (chosen->state == SLEEPING) {
+			queue_add(chosen, &sleeping_list, struct process, links, prio);
+		} else if (chosen->state == ZOMBIE) {
+			queue_add(chosen, &toKill_list, struct process, links, prio);
 		}
 		struct process* former = chosen;
 		chosen = toChoose;
@@ -62,11 +67,11 @@ int getpid() {
 }
 
 void hdl_ret() {
+
     register int eax __asm__("eax");
     exit(eax);
 }
 
-//int start (void (*code)(void), const char *nom, unsigned long ssize, int prio, void *arg) {
 int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int prio, void *arg) {
 	pidmax++;
 	if (pidmax < PROCESS_TABLE_SIZE) {
@@ -81,7 +86,7 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 		newprocess->pid = pidmax;
 		strcpy(newprocess->name, nom);
 		newprocess->process_stack = (int*)mem_alloc(ssize * sizeof(int));
-		//newprocess->process_stack[STACK_SIZE -1] = (int)code;
+
 		newprocess->process_stack[ssize - 3] = (int)code;// CODE FONCTION
 		newprocess->process_stack[ssize - 2] = (int)hdl_ret; // ADR RETOUR
 		newprocess->process_stack[ssize - 1] = (int)arg; // ARG
@@ -116,57 +121,10 @@ int idle(void *arg)
 	return 0;
 }
 
-int tstA(void *arg)
-{
-	(void)arg;
-	for (;;) {
-		printf("I am in A\n"); /* l'autre processus doit afficher des 'A' */
-		/* boucle d'attente pour ne pas afficher trop de caractères */
-		for (int i = 0; i < 1000000; i++){};
-		
-	}
-}
-
-int tstB(void *arg)
-{
-	(void)arg;
-	for (;;) {
-		printf("I am in B\n"); /* l'autre processus doit afficher des 'A' */
-		/* boucle d'attente pour ne pas afficher trop de caractères */
-		for (int i = 0; i < 1000000; i++){};
-	}
-}
-
-int tstC(void *arg)
-{
-	(void)arg;
-	for (;;) {
-		printf("I am in C\n"); /* l'autre processus doit afficher des 'A' */
-		/* boucle d'attente pour ne pas afficher trop de caractères */
-		for (int i = 0; i < 1000000; i++){};
-	}
-}
-
-int tstD(void *arg)
-{
-	(void)arg;
-	for (;;) {
-		printf("I am in D\n"); /* l'autre processus doit afficher des 'A' */
-		/* boucle d'attente pour ne pas afficher trop de caractères */
-		for (int i = 0; i < 1000000; i++){};
-	}
-}
-
 void init_process_stack(void) {
 
 
 	start(idle, "idle", 1024, 128, NULL);
-	/* cree_process((void*)&tstA, "dumb_A", 1024, 512, NULL); */
-	/* cree_process((void*)&tstB, "dumb_B", 1024, 512, NULL); */
-	/* cree_process((void*)&tstC, "dumb_C", 1024, 512, NULL); */
-	/* cree_process((void*)&tstD, "dumb_D", 1024, 512, NULL); */
-
-	display_list(&process_list);
 
 	chosen = queue_out(&process_list, struct process, links);
 }
@@ -217,6 +175,12 @@ void exit(int retval) {
    for (;;){}
 }
 
+/**
+ * kill a process with given PID
+ * pid : the pid of the process to kill
+ * returns : 0 for success, n<0 for fail
+ */
+
 int kill(int pid) {
   struct process* cour;
   queue_for_each(cour, &process_list, struct process, links) {
@@ -230,13 +194,45 @@ int kill(int pid) {
   return -1;
 }
 
+/**
+ * Attend la terminaison d'un fils
+ * pid : le pid à attendre
+ * retvalp : la valeur de retour du fils
+ * returns : 
+ *  si pid est negatif, on attend n'importe quel fils
+ *  si pid est positif, on renvoit la valeur de retour dans retvalp
+ */
+
 int waitpid(int pid, int *retvalp) {
+	printf("Waiting for %d \n", pid);
+	display_list(&process_list);
   if (pid < 0) {
-    //TODO
+    // le processus appelant attend qu'un de ses fils, n'importe lequel, soit terminé et récupère (le cas échéant) sa valeur de retour dans *retvalp, à moins que retvalp soit nul. Cette fonction renvoie une valeur strictement négative si aucun fils n'existe ou sinon le pid de celui dont elle aura récupéré la valeur de retour.
   } else if (pid > 0) {
-    //TODO
-    *retvalp = 0;
-    return pid;
+	  // le processus appelant attend que son fils ayant ce pid soit terminé ou tué
+	  struct process* cour = NULL;
+	  queue_for_each(cour, &process_list, struct process, links) {
+		if (cour->pid==pid) {
+			break;
+		}
+	  }
+	  while(cour->state == ACTIVABLE || cour->state == CHOSEN || cour->state == SLEEPING) {
+		  sti();
+	  }
+	  cli();
+	  
+	  /* Cette fonction échoue et renvoie une valeur strictement négative s'il n'existe pas de processus avec ce pid
+	  ou si ce n'est pas un fils du processus appelant. */
+	  if (cour == NULL) {
+		  return -1;
+	  }
+
+	  // récupère sa valeur de retour dans *retvalp, à moins que retvalp soit nul.
+	  
+	  *retvalp = cour->retval;
+
+	  // En cas de succès, elle retourne la valeur pid. 
+    	return pid;
   } else {
     //TODO
   }

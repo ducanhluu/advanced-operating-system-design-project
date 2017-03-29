@@ -25,11 +25,11 @@ void kernel_start(void) {
 	masque_IRQ(0,0);
 
 	printf("\f");
-
+	
 	printf("group_14@awsome_pc:~$\n");
         init_process_stack();
 
-	start(test1, "test1", 1024, 128, NULL);
+	start(test2, "test2", 1024, 128, NULL);
 	
         idle(NULL);
 
@@ -42,7 +42,3 @@ void kernel_start(void) {
 		hlt();
 	}
 }
-
-// arg
-// adr retour
-// adr code
