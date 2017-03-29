@@ -86,11 +86,11 @@ int preceive(int fid,int *message) {
     if (queues[i]->nb_message == queues[i]->size_max - 1) {
       //la file était pleine
       if (queues[i]->nb_p_bloques > 0) {
-	unblock(queues[i]->p_bloques[0]);
-	queues[i]->nb_p_bloques--;
-	for (int j=0; j<queues[i]->nb_p_bloques; j++) {
-	  queues[i]->p_bloques[j] = queues[i]->p_bloques[j+1];
-	}
+      	unblock(queues[i]->p_bloques[0]);
+	      queues[i]->nb_p_bloques--;
+      	for (int j=0; j<queues[i]->nb_p_bloques; j++) {
+      	  queues[i]->p_bloques[j] = queues[i]->p_bloques[j+1];
+      	}
       }
     }
   } else {
@@ -127,20 +127,17 @@ int psend(int fid, int message) {
   if (fid >= nb_queue) {
     return -1;
   }
-  if (queues[fid]->nb_message == 0 ){//}&& nb_p_bloques !=0) {
-    queues[fid]->messages = &message;
-    //int a;
-    //preceive(fid, &a);
+  if (queues[fid]->nb_message == 0 ) && queues[fid]->nb_p_bloques != 0) {
+    // doit recevoir le message LOL
+    queues[fid]->messages[0] = &message;
+    int a;
+    preceive(fid, &a);
+    unblock(queues[fid]->p_bloques[0]);
+  } else if (queues[fid]->nb_message == queues[fid]->size_max) {
+    block_send(getpid());
+  } else {
+    queues[fid]->nb_message = message;
+    queues[fid]->nb_message++;
   }
-  if (queues[fid]->nb_message == queues[fid]->size_max) {
-
-  }
-
-
-
-// trouver la taille de la file
-
-
-
-   return 0;
+  return 0;
 }
