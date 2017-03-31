@@ -50,6 +50,10 @@ void ordonnance() {
 		}
 		struct process* former = chosen;
 		chosen = toChoose;
+		chosen->prio--;
+		if (chosen->prio < 0) {
+			chosen->prio = 0;
+		}
 		ctx_sw(former->register_save, chosen->register_save);
 	}
 }
@@ -93,13 +97,14 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 		newprocess->register_save[1] = (int)&(newprocess->process_stack[ssize - 3]);
 		newprocess->wakeUpTime = -1;
 		newprocess->prio = prio;
+
 		///////////////////////////////
 		if (chosen != NULL) {
 		  newprocess->parent_pid = chosen->pid;
 		}
 		///////////////////////////////
 		queue_add(newprocess, &process_list, struct process, links, prio);
-
+		
 		return pidmax;
 	} else {
 
@@ -204,28 +209,30 @@ int kill(int pid) {
  */
 
 int waitpid(int pid, int *retvalp) {
-	printf("Waiting for %d \n", pid);
-	display_list(&process_list);
   if (pid < 0) {
     // le processus appelant attend qu'un de ses fils, n'importe lequel, soit terminé et récupère (le cas échéant) sa valeur de retour dans *retvalp, à moins que retvalp soit nul. Cette fonction renvoie une valeur strictement négative si aucun fils n'existe ou sinon le pid de celui dont elle aura récupéré la valeur de retour.
   } else if (pid > 0) {
 	  // le processus appelant attend que son fils ayant ce pid soit terminé ou tué
 	  struct process* cour = NULL;
+	  bool found = false;
 	  queue_for_each(cour, &process_list, struct process, links) {
 		if (cour->pid==pid) {
+			found = true;
 			break;
 		}
+		found = false;
 	  }
+
+/* Cette fonction échoue et renvoie une valeur strictement négative s'il n'existe pas de processus avec ce pid
+	  ou si ce n'est pas un fils du processus appelant. */
+	  if (cour == NULL || !found) {
+		  return -1;
+	  }
+
 	  while(cour->state == ACTIVABLE || cour->state == CHOSEN || cour->state == SLEEPING) {
 		  sti();
 	  }
 	  cli();
-	  
-	  /* Cette fonction échoue et renvoie une valeur strictement négative s'il n'existe pas de processus avec ce pid
-	  ou si ce n'est pas un fils du processus appelant. */
-	  if (cour == NULL) {
-		  return -1;
-	  }
 
 	  // récupère sa valeur de retour dans *retvalp, à moins que retvalp soit nul.
 	  

@@ -59,14 +59,14 @@ int test1(void *arg)
         printf(" 2");
         r = waitpid(pid1, &rval);
         assert(r == pid1);
-        //assert(rval == 3);
+        assert(rval == 3);
         printf(" 3");
         pid1 = start(dummy2, "dummy2", 4000, 100, (void *) (DUMMY_VAL + 1));
         assert(pid1 > 0);
         printf(" 4");
         r = waitpid(pid1, &rval);
         assert(r == pid1);
-        //assert(rval == 4);
+        assert(rval == 4);
         printf(" 6.\n");
         return 0;
 }

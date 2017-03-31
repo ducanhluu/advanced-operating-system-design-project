@@ -45,6 +45,7 @@ struct process {
   int wakeUpTime;
   int retval;
   int parent_pid;
+  struct list_link children;
 };
 
 #endif
