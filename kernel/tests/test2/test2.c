@@ -9,19 +9,28 @@ int main(void *arg)
 
         (void)arg;
 
+	// Create a procKill
         printf("1");
-        pid1 = start("procKill", 4000, 100, (void *) val);
+        pid1 = start(procKill, 4000, 100, (void *) val);
         assert(pid1 > 0);
+
+	// Kill the process
         printf(" 2");
         r = kill(pid1);
         assert(r == 0);
+
+	// 
         printf(" 3");
         r = waitpid(pid1, &rval);
         assert(rval == 0);
         assert(r == pid1);
+
+	
         printf(" 4");
-        pid1 = start("procExit", 4000, 192, (void *) val);
+        pid1 = start(procExit, 4000, 192, (void *) val);
         assert(pid1 > 0);
+
+	
         printf(" 6");
         r = waitpid(pid1, &rval);
         assert(rval == val);
