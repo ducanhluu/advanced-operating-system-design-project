@@ -124,15 +124,20 @@ int preset(int fid) {
 }
 
 int psend(int fid, int message) {
-  if (fid >= nb_queue) {
+  int i = 0;
+  while (i < nb_queue && queues[i]->fid != fid) {
+    i++;
+  }
+  if (i == nb_queue) {
     return -1;
   }
-  if (queues[fid]->nb_message == 0 ) && queues[fid]->nb_p_bloques != 0) {
+  if (queues[fid]->nb_message == 0 && queues[fid]->nb_p_bloques != 0) {
     // doit recevoir le message LOL
-    queues[fid]->messages[0] = &message;
-    int a;
-    preceive(fid, &a);
-    unblock(queues[fid]->p_bloques[0]);
+    //queues[fid]->messages[0] = &message;
+    //int a;
+    //preceive(fid, &a);
+    // unblock deja fait dans preceive
+    // unblock(queues[fid]->p_bloques[0]);
   } else if (queues[fid]->nb_message == queues[fid]->size_max) {
     block_send(getpid());
   } else {
