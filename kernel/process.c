@@ -78,7 +78,7 @@ void hdl_ret() {
 
 int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int prio, void *arg) {
 	pidmax++;
-	if (pidmax < PROCESS_TABLE_SIZE) {
+	if (pidmax < PROCESS_TABLE_SIZE && prio >= 1 && prio <= MAXPRIO) {
 		struct process* newprocess = (struct process*)mem_alloc(sizeof(struct process));
 		
 		if (queue_empty(&process_list)) {
@@ -107,7 +107,7 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 		
 		return pidmax;
 	} else {
-
+	        pidmax--;
 		printf("error, cannot insert %s", nom);
 
 		return -1;
@@ -245,6 +245,33 @@ int waitpid(int pid, int *retvalp) {
   }
   return -1;
 }
+
+
+int chprio(int pid, int newprio) {
+  struct process* cour;
+  if (newprio < 1 || newprio > MAXPRIO) {
+    return -1;
+  }
+  queue_for_each(cour, &process_list, struct process, links) {
+    if (cour->pid == pid) {
+      int anc_prio = cour->prio;
+      cour->prio = newprio;
+      //si attente du proc ds une file, on le replace selon nvelle prio
+      if (cour->state == SLEEPING) {
+	queue_del(cour,links);
+	queue_add(cour, &sleeping_list, struct process, links, prio);
+      }
+      if (cour->state == ACTIVABLE){
+	queue_del(cour,links);
+	queue_add(cour, &process_list, struct process, links, prio);
+      }
+      ordonnance(); //pas sûr
+      return anc_prio;
+    }
+  }
+  return -1;
+}
+
   
 // SEMAPHORE
 void bloque_sur_semaphore() {
