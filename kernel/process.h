@@ -27,7 +27,7 @@ void exit(int retval);
 int kill(int pid);
 int waitpid(int pid, int *retvalp);
 int chprio(int pid, int newprio);
-
+int getprio(int pid);
 // SEMAPHORE
 void bloque_sur_semaphore();
 void passe_activable(int pid);

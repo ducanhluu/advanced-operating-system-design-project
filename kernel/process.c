@@ -54,6 +54,7 @@ void ordonnance() {
 		if (chosen->prio < 0) {
 			chosen->prio = 0;
 		}
+		//chosen->prio++;
 		ctx_sw(former->register_save, chosen->register_save);
 	}
 }
@@ -101,9 +102,13 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 		///////////////////////////////
 		if (chosen != NULL) {
 		  newprocess->parent_pid = chosen->pid;
-		}
+		  queue_add(newprocess, &process_list, struct process, links, prio);
+		  if (chosen->prio < prio)
+		    ordonnance();
+		} else {
 		///////////////////////////////
-		queue_add(newprocess, &process_list, struct process, links, prio);
+		  queue_add(newprocess, &process_list, struct process, links, prio);
+		}
 		
 		return pidmax;
 	} else {
@@ -223,6 +228,18 @@ int waitpid(int pid, int *retvalp) {
 		found = false;
 	  }
 
+	  //cherche dans la liste de processus ZOMBIE 
+	  if (!found) {
+	    cour = NULL;
+	    queue_for_each(cour, &toKill_list, struct process, links) {
+	      if (cour->pid==pid) {
+		found = true;
+		break;
+	      }
+	      found = false;
+	    }
+	  }
+
 /* Cette fonction échoue et renvoie une valeur strictement négative s'il n'existe pas de processus avec ce pid
 	  ou si ce n'est pas un fils du processus appelant. */
 	  if (cour == NULL || !found) {
@@ -237,13 +254,14 @@ int waitpid(int pid, int *retvalp) {
 	  // récupère sa valeur de retour dans *retvalp, à moins que retvalp soit nul.
 	  
 	  *retvalp = cour->retval;
-
+	  // Détruit le processus fils
+	  queue_del(cour, links);
 	  // En cas de succès, elle retourne la valeur pid. 
-    	return pid;
+	  return pid;
   } else {
     //TODO
   }
-  return -1;
+  return -2;
 }
 
 
@@ -269,6 +287,26 @@ int chprio(int pid, int newprio) {
       return anc_prio;
     }
   }
+  return -1;
+}
+
+/**
+ * Si pid invalide, retourne -1
+ * sinon, retourne la priorité du processus pid. 
+ */
+int getprio(int pid) {
+  if (pid < 0)
+    return -1;
+
+  if (chosen->pid == pid)
+    return chosen->prio;
+  
+  struct process* cour;
+  queue_for_each(cour, &process_list, struct process, links) {
+    if (cour->pid == pid)
+      return cour->prio;
+  }
+
   return -1;
 }
 
