@@ -166,7 +166,6 @@ int test3(void *arg)
 
         (void)arg;
 
-	printf("%d", getprio(getpid()));
         assert(getprio(getpid()) == 128);
         pid1 = start(prio4, "prio4", 4000, p, (void *) p);
         assert(pid1 > 0);

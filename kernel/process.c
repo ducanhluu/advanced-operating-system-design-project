@@ -54,7 +54,7 @@ void ordonnance() {
 		if (chosen->prio < 0) {
 			chosen->prio = 0;
 		}
-		//chosen->prio++;
+		chosen->prio++;
 		ctx_sw(former->register_save, chosen->register_save);
 	}
 }
@@ -252,8 +252,8 @@ int waitpid(int pid, int *retvalp) {
 	  cli();
 
 	  // récupère sa valeur de retour dans *retvalp, à moins que retvalp soit nul.
-	  
-	  *retvalp = cour->retval;
+	  if (retvalp != NULL)
+	    *retvalp = cour->retval;
 	  // Détruit le processus fils
 	  queue_del(cour, links);
 	  // En cas de succès, elle retourne la valeur pid. 
@@ -267,26 +267,37 @@ int waitpid(int pid, int *retvalp) {
 
 int chprio(int pid, int newprio) {
   struct process* cour;
+  int anc_prio;
   if (newprio < 1 || newprio > MAXPRIO) {
     return -1;
   }
+
+  queue_add(chosen, &process_list, struct process, links, prio);   
+  
   queue_for_each(cour, &process_list, struct process, links) {
     if (cour->pid == pid) {
-      int anc_prio = cour->prio;
+      anc_prio = cour->prio;
       cour->prio = newprio;
+      break;
+    }
+  }
+
+  if (cour != NULL) {
       //si attente du proc ds une file, on le replace selon nvelle prio
       if (cour->state == SLEEPING) {
 	queue_del(cour,links);
 	queue_add(cour, &sleeping_list, struct process, links, prio);
       }
+      
       if (cour->state == ACTIVABLE){
 	queue_del(cour,links);
 	queue_add(cour, &process_list, struct process, links, prio);
       }
-      ordonnance(); //pas sûr
+      queue_del(chosen,links);
+      ordonnance();
       return anc_prio;
-    }
   }
+  queue_del(chosen,links);
   return -1;
 }
 
