@@ -134,7 +134,7 @@ int idle(void *arg)
 void init_process_stack(void) {
 
 
-	start(idle, "idle", 1024, 128, NULL);
+	start(idle, "idle", 1024, 1, NULL);
 
 	chosen = queue_out(&process_list, struct process, links);
 }
@@ -196,7 +196,8 @@ int kill(int pid) {
   queue_for_each(cour, &process_list, struct process, links) {
     if (cour->pid == pid) {
       cour->state = ZOMBIE;
-      ordonnance();
+      cour->retval = 0;
+      
       return 0;
     }
   }
