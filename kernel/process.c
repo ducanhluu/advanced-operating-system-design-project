@@ -97,15 +97,14 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 		newprocess->register_save[1] = (int)&(newprocess->process_stack[ssize - 3]);
 		newprocess->wakeUpTime = -1;
 		newprocess->prio = prio;
-		INIT_LIST_HEAD(&(newprocess->children));
 
 		///////////////////////////////
 		if (chosen != NULL) {
 		  newprocess->parent_pid = chosen->pid;
-		  queue_add(newprocess, &(chosen->children), struct process, links, prio);
 		}
 		///////////////////////////////
 		queue_add(newprocess, &process_list, struct process, links, prio);
+		
 		return pidmax;
 	} else {
 
@@ -153,7 +152,7 @@ void block_send(int pid){
 		if (cour->pid == pid) {
 			cour->state = BLOCKED_ON_MSG_SEND;
 			ordonnance();
-			return;
+		  return;
 		}
 	}
 	printf("Process %d not found\n", pid);
@@ -165,7 +164,7 @@ void block_recv(int pid){
 		if (cour->pid == pid) {
 			cour->state = BLOCKED_ON_MSG_RCV;
 			ordonnance();
-			return;
+		  return;
 		}
 	}
 	printf("Process %d not found\n", pid);
@@ -216,7 +215,7 @@ int waitpid(int pid, int *retvalp) {
 	  // le processus appelant attend que son fils ayant ce pid soit terminé ou tué
 	  struct process* cour = NULL;
 	  bool found = false;
-	  queue_for_each(cour, &(chosen->children), struct process, links) {
+	  queue_for_each(cour, &process_list, struct process, links) {
 		if (cour->pid==pid) {
 			found = true;
 			break;

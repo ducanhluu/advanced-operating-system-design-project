@@ -41,9 +41,9 @@ void tic_PIT() {
 
 	char timestring[8];
 	sprintf(timestring,"%02d:%02d:%02d", hr, min, sec);
+	sti();	
 	ordonnance();	
 	display_corner(timestring);
-	sti();	
 }
 
 void init_traitant_IT(int32_t num_IT, void (*traitant)(void)) {
