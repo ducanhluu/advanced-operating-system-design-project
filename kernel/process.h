@@ -6,7 +6,8 @@
 
 #define MAX_NAME_LENGTH 64
 #define STACK_SIZE 8192
-#define PROCESS_TABLE_SIZE 10
+#define PROCESS_TABLE_SIZE 10 //TODO plutôt NBPROC ?
+#define MAXPRIO 256 //TODO verif borné partout
 
 int idle(void *);
 void proc1();
@@ -25,7 +26,8 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 void exit(int retval);
 int kill(int pid);
 int waitpid(int pid, int *retvalp);
-
+int chprio(int pid, int newprio);
+int getprio(int pid);
 // SEMAPHORE
 void bloque_sur_semaphore();
 void passe_activable(int pid);
