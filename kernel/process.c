@@ -99,14 +99,14 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 		newprocess->wakeUpTime = -1;
 		newprocess->prio = prio;
 		///////////////////////////////
-		LIST_HEAD(children);
-		newprocess->children = &children;
+		/* LIST_HEAD(children); */
+		/* newprocess->children = &children; */
 		
-		struct children *child =  (struct children*)mem_alloc(sizeof(struct children));
-		child->pid = newprocess->pid;
+		/* struct children *child =  (struct children*)mem_alloc(sizeof(struct children)); */
+		/* child->pid = newprocess->pid; */
 		
 		if (chosen != NULL) {
-		  queue_add(child, chosen->children, struct children, links, pid);
+		  //  queue_add(child, chosen->children, struct children, links, pid);
 		  ///////////////////////////////
 		  newprocess->parent_pid = chosen->pid;
 		  queue_add(newprocess, &process_list, struct process, links, prio);
@@ -231,23 +231,23 @@ int waitpid(int pid, int *retvalp) {
 	  struct process* cour = NULL;
 	  bool found = false;
 
-	  struct children *child;
+	  /* struct children *child; */
 	  
-	  if (queue_empty(chosen->children)) {
-	    printf("%s", chosen->name);
-	    return -1; //ce processus appelant n'a aucun fils
-	  }
+	  /* if (queue_empty(chosen->children)) { */
+	  /*   printf("%s", chosen->name); */
+	  /*   return -1; //ce processus appelant n'a aucun fils */
+	  /* } */
 	  
-	  queue_for_each(child, chosen->children, struct children, links) {
-	    if (child->pid == pid) {
-	      found = true;
-	      break;
-	    }
-	  }
+	  /* queue_for_each(child, chosen->children, struct children, links) { */
+	  /*   if (child->pid == pid) { */
+	  /*     found = true; */
+	  /*     break; */
+	  /*   } */
+	  /* } */
 	  
-	  if (!found) {
-	    return -1; //ce pid n'est pas un fils du processus appelant.
-	  }
+	  /* if (!found) { */
+	  /*   return -1; //ce pid n'est pas un fils du processus appelant. */
+	  /* } */
 	  
 	  queue_for_each(cour, &process_list, struct process, links) {
 		if (cour->pid==pid) {
