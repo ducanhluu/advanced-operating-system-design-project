@@ -36,6 +36,11 @@ void passe_activable(int pid);
 
 typedef enum {CHOSEN, ACTIVABLE, SLEEPING, BLOCKED_ON_SEM, BLOCKED_ON_MSG_SEND, BLOCKED_ON_MSG_RCV, ZOMBIE} process_state;
 
+struct children {
+  int pid;
+  link links;
+};
+
 struct process {
   int pid;
   int prio;
@@ -47,7 +52,7 @@ struct process {
   int wakeUpTime;
   int retval;
   int parent_pid;
-  struct list_link children;
+  struct list_link *children;
 };
 
 #endif

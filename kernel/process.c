@@ -98,15 +98,22 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 		newprocess->register_save[1] = (int)&(newprocess->process_stack[ssize - 3]);
 		newprocess->wakeUpTime = -1;
 		newprocess->prio = prio;
-
 		///////////////////////////////
+		LIST_HEAD(children);
+		newprocess->children = &children;
+		
+		struct children *child =  (struct children*)mem_alloc(sizeof(struct children));
+		child->pid = newprocess->pid;
+		
 		if (chosen != NULL) {
+		  queue_add(child, chosen->children, struct children, links, pid);
+		  ///////////////////////////////
 		  newprocess->parent_pid = chosen->pid;
 		  queue_add(newprocess, &process_list, struct process, links, prio);
 		  if (chosen->prio < prio)
 		    ordonnance();
 		} else {
-		///////////////////////////////
+		
 		  queue_add(newprocess, &process_list, struct process, links, prio);
 		}
 		
@@ -193,11 +200,13 @@ void exit(int retval) {
 
 int kill(int pid) {
   struct process* cour;
+  if (pid <= 0) {
+    return -1;
+  }
   queue_for_each(cour, &process_list, struct process, links) {
-    if (cour->pid == pid) {
+    if (cour->pid == pid && cour->state != ZOMBIE) {
       cour->state = ZOMBIE;
       cour->retval = 0;
-      
       return 0;
     }
   }
@@ -221,6 +230,25 @@ int waitpid(int pid, int *retvalp) {
 	  // le processus appelant attend que son fils ayant ce pid soit terminé ou tué
 	  struct process* cour = NULL;
 	  bool found = false;
+
+	  struct children *child;
+	  
+	  if (queue_empty(chosen->children)) {
+	    printf("%s", chosen->name);
+	    return -1; //ce processus appelant n'a aucun fils
+	  }
+	  
+	  queue_for_each(child, chosen->children, struct children, links) {
+	    if (child->pid == pid) {
+	      found = true;
+	      break;
+	    }
+	  }
+	  
+	  if (!found) {
+	    return -1; //ce pid n'est pas un fils du processus appelant.
+	  }
+	  
 	  queue_for_each(cour, &process_list, struct process, links) {
 		if (cour->pid==pid) {
 			found = true;
@@ -257,17 +285,18 @@ int waitpid(int pid, int *retvalp) {
 	    *retvalp = cour->retval;
 	  // Détruit le processus fils
 	  queue_del(cour, links);
+	  //queue_del(child, links);
 	  // En cas de succès, elle retourne la valeur pid. 
 	  return pid;
   } else {
-    //TODO
+    return -3; // 0: pid invalide
   }
   return -2;
 }
 
 
 int chprio(int pid, int newprio) {
-  struct process* cour;
+  struct process* cour = NULL;
   int anc_prio;
   if (newprio < 1 || newprio > MAXPRIO) {
     return -1;
@@ -283,7 +312,7 @@ int chprio(int pid, int newprio) {
     }
   }
 
-  if (cour != NULL) {
+  if (cour != NULL && cour->state != ZOMBIE) {
       //si attente du proc ds une file, on le replace selon nvelle prio
       if (cour->state == SLEEPING) {
 	queue_del(cour,links);
@@ -322,7 +351,6 @@ int getprio(int pid) {
   return -1;
 }
 
-  
 // SEMAPHORE
 void bloque_sur_semaphore() {
     chosen->state = BLOCKED_ON_SEM;
