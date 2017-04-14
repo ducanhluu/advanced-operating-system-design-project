@@ -315,13 +315,13 @@ int chprio(int pid, int newprio) {
   if (cour != NULL && cour->state != ZOMBIE) {
       //si attente du proc ds une file, on le replace selon nvelle prio
       if (cour->state == SLEEPING) {
-	queue_del(cour,links);
-	queue_add(cour, &sleeping_list, struct process, links, prio);
+				queue_del(cour,links);
+				queue_add(cour, &sleeping_list, struct process, links, prio);
       }
       
       if (cour->state == ACTIVABLE){
-	queue_del(cour,links);
-	queue_add(cour, &process_list, struct process, links, prio);
+				queue_del(cour,links);
+				queue_add(cour, &process_list, struct process, links, prio);
       }
       queue_del(chosen,links);
       ordonnance();
