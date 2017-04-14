@@ -219,15 +219,15 @@ static const int loop_count1 = 10;//10000;
 int busy1(void *arg)
 {
         (void)arg;
-        /* while (1) { */
-        /*         int i, j; */
+        while (1) {
+                int i, j;
 
-        /*         printf(" A"); */
-        /*         for (i=0; i<loop_count1; i++) { */
-	/* 	  //test_it(); c'est quoi? */
-        /*                 for (j=0; j<loop_count0; j++); */
-        /*         } */
-        /* } */
+                printf(" A");
+                for (i=0; i<loop_count1; i++) {
+                        test_it();
+                        for (j=0; j<loop_count0; j++);
+                }
+        }
         return 0;
 }
 
@@ -235,15 +235,15 @@ int busy2(void *arg)
 {
         int i;
 
-        /* for (i = 0; i < 3; i++) { */
-        /*         int k, j; */
+        for (i = 0; i < 3; i++) {
+                int k, j;
 
-        /*         printf(" B"); */
-        /*         for (k=0; k<loop_count1; k++) { */
-	/* 	  //test_it(); c'est quoi? */
-        /*                 for (j=0; j<loop_count0; j++); */
-        /*         } */
-        /* } */
+                printf(" B");
+                for (k=0; k<loop_count1; k++) {
+                        test_it();
+                        for (j=0; j<loop_count0; j++);
+                }
+        }
         i = chprio((int) arg, 16);
         assert(i == 64);
         return 0;
