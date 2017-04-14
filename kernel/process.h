@@ -6,7 +6,7 @@
 
 #define MAX_NAME_LENGTH 64
 #define STACK_SIZE 8192
-#define PROCESS_TABLE_SIZE 10 //TODO plutôt NBPROC ?
+#define PROCESS_TABLE_SIZE 64 //TODO plutôt NBPROC ?
 #define MAXPRIO 256 //TODO verif borné partout
 
 int idle(void *);
