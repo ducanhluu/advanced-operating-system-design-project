@@ -224,7 +224,7 @@ int busy1(void *arg)
 
                 printf(" A");
                 for (i=0; i<loop_count1; i++) {
-                        test_it();
+                        //test_it();
                         for (j=0; j<loop_count0; j++);
                 }
         }
@@ -240,7 +240,7 @@ int busy2(void *arg)
 
                 printf(" B");
                 for (k=0; k<loop_count1; k++) {
-                        test_it();
+                        //test_it();
                         for (j=0; j<loop_count0; j++);
                 }
         }
