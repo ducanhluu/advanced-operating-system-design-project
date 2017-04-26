@@ -21,23 +21,28 @@ void display_list(link* head) {
 	printf("DISPLAY\n");
 	if (chosen != NULL) {
 		printf("## chosen : \n");
-		printf("   %s [PID=%d]\n", chosen->name, chosen->pid);
+		printf("   %s [PID=%d ; PRIO=%d]\n", chosen->name, chosen->pid, chosen->prio);
 	}
 	printf("## Process_list : \n");
 	struct process* cour;
 	queue_for_each(cour, head, struct process, links) {
-		printf("   %s [PID=%d]\n", cour->name, cour->pid);
-	}
-	printf("## Head : \n");
-	if (!queue_empty(&process_list)) {
-		struct process* head = ((struct process*)queue_top(&process_list, struct process, links));
-		printf("   %s [PID=%d]\n",head->name, head->pid);
+		printf("   %s [PID=%d ; PRIO=%d]\n", cour->name, cour->pid, cour->prio);
 	}
 	printf("__________\n\n");
 }
 
 void ordonnance() {
+	// display_list(&process_list);
+	// Take the first activable process : we handle zombie process
+	
+	while (!queue_empty(&process_list) && ((struct process*)queue_top(&process_list, struct process, links))->state == ZOMBIE) {
+		struct process* cour = queue_out(&process_list, struct process, links);
+		queue_add(cour, &toKill_list, struct process, links, prio);
+	}
+
+
 	struct process* toChoose = queue_out(&process_list, struct process, links);
+	
 	if (toChoose != NULL) {
 		toChoose->state = CHOSEN;
 		if (chosen->state == CHOSEN) {
@@ -50,11 +55,6 @@ void ordonnance() {
 		}
 		struct process* former = chosen;
 		chosen = toChoose;
-		chosen->prio--;
-		if (chosen->prio < 0) {
-			chosen->prio = 0;
-		}
-		chosen->prio++;
 		ctx_sw(former->register_save, chosen->register_save);
 	}
 }
@@ -82,7 +82,7 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 	if (pidmax < PROCESS_TABLE_SIZE && prio >= 1 && prio <= MAXPRIO) {
 		struct process* newprocess = (struct process*)mem_alloc(sizeof(struct process));
 		
-		if (queue_empty(&process_list)) {
+		if (queue_empty(&process_list) && chosen == NULL) {
 			newprocess->state = CHOSEN;
 		} else {
 			newprocess->state = ACTIVABLE;
@@ -199,6 +199,9 @@ void exit(int retval) {
  */
 
 int kill(int pid) {
+	cli();
+
+
   struct process* cour;
   if (pid <= 0) {
     return -1;
@@ -207,10 +210,13 @@ int kill(int pid) {
     if (cour->pid == pid && cour->state != ZOMBIE) {
       cour->state = ZOMBIE;
       cour->retval = 0;
+
+      sti();
       return 0;
     }
   }
   //process non trouvé
+	sti();
   return -1;
 }
 
@@ -298,12 +304,14 @@ int waitpid(int pid, int *retvalp) {
 int chprio(int pid, int newprio) {
   struct process* cour = NULL;
   int anc_prio;
+
+	// Handle error case
   if (newprio < 1 || newprio > MAXPRIO) {
     return -1;
   }
 
-  queue_add(chosen, &process_list, struct process, links, prio);   
-  
+  queue_add(chosen, &process_list, struct process, links, prio);  // WTF HERE ?
+
   queue_for_each(cour, &process_list, struct process, links) {
     if (cour->pid == pid) {
       anc_prio = cour->prio;
@@ -317,14 +325,13 @@ int chprio(int pid, int newprio) {
       if (cour->state == SLEEPING) {
 				queue_del(cour,links);
 				queue_add(cour, &sleeping_list, struct process, links, prio);
-      }
-      
-      if (cour->state == ACTIVABLE){
+      } else if (cour->state == ACTIVABLE){
 				queue_del(cour,links);
 				queue_add(cour, &process_list, struct process, links, prio);
       }
       queue_del(chosen,links);
       ordonnance();
+
       return anc_prio;
   }
   queue_del(chosen,links);
