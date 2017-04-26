@@ -81,13 +81,16 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 	pidmax++;
 	if (pidmax < PROCESS_TABLE_SIZE && prio >= 1 && prio <= MAXPRIO) {
 		struct process* newprocess = (struct process*)mem_alloc(sizeof(struct process));
-		
+
 		if (queue_empty(&process_list)) {
 			newprocess->state = CHOSEN;
 		} else {
 			newprocess->state = ACTIVABLE;
 		}
 
+		//TODO si ssize trop petit --> pb a gérer
+		//if ssize trop petit return un truc négatif
+		
 		newprocess->pid = pidmax;
 		strcpy(newprocess->name, nom);
 		newprocess->process_stack = (int*)mem_alloc(ssize * sizeof(int));
@@ -101,10 +104,10 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 		///////////////////////////////
 		/* LIST_HEAD(children); */
 		/* newprocess->children = &children; */
-		
+
 		/* struct children *child =  (struct children*)mem_alloc(sizeof(struct children)); */
 		/* child->pid = newprocess->pid; */
-		
+
 		if (chosen != NULL) {
 		  //  queue_add(child, chosen->children, struct children, links, pid);
 		  ///////////////////////////////
@@ -113,10 +116,10 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 		  if (chosen->prio < prio)
 		    ordonnance();
 		} else {
-		
+
 		  queue_add(newprocess, &process_list, struct process, links, prio);
 		}
-		
+
 		return pidmax;
 	} else {
 	        pidmax--;
@@ -129,7 +132,7 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 
 int idle(void *arg)
 {
-  (void)arg; 
+  (void)arg;
 	for (;;) {
 		sti();
 		hlt();
@@ -188,7 +191,7 @@ void exit(int retval) {
    chosen->retval = retval;
    chosen->state = ZOMBIE;
    ordonnance();
-  
+
    for (;;){}
 }
 
@@ -218,7 +221,7 @@ int kill(int pid) {
  * Attend la terminaison d'un fils
  * pid : le pid à attendre
  * retvalp : la valeur de retour du fils
- * returns : 
+ * returns :
  *  si pid est negatif, on attend n'importe quel fils
  *  si pid est positif, on renvoit la valeur de retour dans retvalp
  */
@@ -232,23 +235,23 @@ int waitpid(int pid, int *retvalp) {
 	  bool found = false;
 
 	  /* struct children *child; */
-	  
+
 	  /* if (queue_empty(chosen->children)) { */
 	  /*   printf("%s", chosen->name); */
 	  /*   return -1; //ce processus appelant n'a aucun fils */
 	  /* } */
-	  
+
 	  /* queue_for_each(child, chosen->children, struct children, links) { */
 	  /*   if (child->pid == pid) { */
 	  /*     found = true; */
 	  /*     break; */
 	  /*   } */
 	  /* } */
-	  
+
 	  /* if (!found) { */
 	  /*   return -1; //ce pid n'est pas un fils du processus appelant. */
 	  /* } */
-	  
+
 	  queue_for_each(cour, &process_list, struct process, links) {
 		if (cour->pid==pid) {
 			found = true;
@@ -257,7 +260,7 @@ int waitpid(int pid, int *retvalp) {
 		found = false;
 	  }
 
-	  //cherche dans la liste de processus ZOMBIE 
+	  //cherche dans la liste de processus ZOMBIE
 	  if (!found) {
 	    cour = NULL;
 	    queue_for_each(cour, &toKill_list, struct process, links) {
@@ -286,7 +289,7 @@ int waitpid(int pid, int *retvalp) {
 	  // Détruit le processus fils
 	  queue_del(cour, links);
 	  //queue_del(child, links);
-	  // En cas de succès, elle retourne la valeur pid. 
+	  // En cas de succès, elle retourne la valeur pid.
 	  return pid;
   } else {
     return -3; // 0: pid invalide
@@ -302,8 +305,8 @@ int chprio(int pid, int newprio) {
     return -1;
   }
 
-  queue_add(chosen, &process_list, struct process, links, prio);   
-  
+  queue_add(chosen, &process_list, struct process, links, prio);
+
   queue_for_each(cour, &process_list, struct process, links) {
     if (cour->pid == pid) {
       anc_prio = cour->prio;
@@ -318,7 +321,7 @@ int chprio(int pid, int newprio) {
 				queue_del(cour,links);
 				queue_add(cour, &sleeping_list, struct process, links, prio);
       }
-      
+
       if (cour->state == ACTIVABLE){
 				queue_del(cour,links);
 				queue_add(cour, &process_list, struct process, links, prio);
@@ -333,7 +336,7 @@ int chprio(int pid, int newprio) {
 
 /**
  * Si pid invalide, retourne -1
- * sinon, retourne la priorité du processus pid. 
+ * sinon, retourne la priorité du processus pid.
  */
 int getprio(int pid) {
   if (pid < 0)
@@ -341,7 +344,7 @@ int getprio(int pid) {
 
   if (chosen->pid == pid)
     return chosen->prio;
-  
+
   struct process* cour;
   queue_for_each(cour, &process_list, struct process, links) {
     if (cour->pid == pid)

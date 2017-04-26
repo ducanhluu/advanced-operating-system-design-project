@@ -338,6 +338,132 @@ int test5(void *arg)
  * End Test 5
  ******************************************************************************/
 
+ /*******************************************************************************
+  * Test 6
+  ******************************************************************************/
+
+  // #ifndef _TEST6_H_
+  // #define _TEST6_H_
+
+ int proc6_1(void *arg) {
+   (void) arg;
+ #if defined microblaze
+   __asm__(
+ 	  ".text\n"
+ 	  ".globl main_1\n"
+ 	  "main_1:\n"
+ 	  "addik r3,r0,3\n"
+ 	  "rtsd r15,8\n"
+ 	  "nop\n"
+ 	  ".previous\n"
+ 	  );
+ #else
+   __asm__(
+ 	  ".text\n"
+ 	  ".globl main_1\n"
+ 	  "main_1:\n"
+ 	  "movl $3,%eax\n"
+ 	  "ret\n"
+ 	  ".previous\n"
+ 	  );
+ #endif
+   return 0;
+ }
+
+  int proc6_2(void *arg) {
+   (void) arg;
+ #if defined microblaze
+   __asm__(
+ 	  ".text\n"
+ 	  ".globl main_2\n"
+ 	  "main_2:\n"
+ 	  "addk r3,r0,r5\n"
+ 	  "swi r3,r1,-4\n"
+ 	  "rtsd r15,8\n"
+ 	  "nop\n"
+ 	  ".previous\n"
+ 	  );
+ #else
+   __asm__(
+ 	  ".text\n"
+ 	  ".globl main_2\n"
+ 	  "main_2:\n"
+ 	  "movl 4(%esp),%eax\n"
+ 	  "pushl %eax\n"
+ 	  "popl %eax\n"
+ 	  "ret\n"
+ 	  ".previous\n"
+ 	  );
+ #endif
+   return 0;
+ }
+
+ int proc6_3(void *arg) {
+   (void) arg;
+ #if defined microblaze
+   __asm__(
+ 	  ".text\n"
+ 	  ".globl main_3\n"
+ 	  "main_3:\n"
+ 	  "addk r3,r0,r5\n"
+ 	  "swi r3,r1,-4\n"
+ 	  "rtsd r15,8\n"
+ 	  "nop\n"
+ 	  ".previous\n"
+ 	  );
+ #else
+   __asm__(
+ 	  ".text\n"
+ 	  ".globl main_3\n"
+ 	  "main_3:\n"
+ 	  "movl 4(%esp),%eax\n"
+ 	  "pushl %eax\n"
+ 	  "popl %eax\n"
+ 	  "ret\n"
+ 	  ".previous\n"
+ 	  );
+ #endif
+   return 0;
+ }
+
+ // #endif
+
+ int test6(void *arg){
+   //int pid1, pid2, pid3;
+   //int ret;
+   int pid1;
+   (void)arg;
+
+   assert(getprio(getpid()) == 128);
+   pid1 = -15000;
+   pid1 = start(proc6_1, "proc6_1", 0, 64, 0); //ssize nul!!! O_O
+   printf("%d",pid1);
+   /*assert(pid1 > 0);
+   pid2 = start(proc6_2, "proc6_2", 4, 66, (void*)4);
+   assert(pid2 > 0);
+   pid3 = start(proc6_3, "proc6_3", 0xffffffff, 65, (void*)5);
+   assert(pid3 < 0);
+   pid3 = start(proc6_3, "proc6_3", 8, 65, (void*)5);
+   assert(pid3 > 0);
+   assert(waitpid(-1, &ret) == pid2);
+   assert(ret == 4);
+   assert(waitpid(-1, &ret) == pid3);
+   assert(ret == 5);
+   assert(waitpid(-1, &ret) == pid1);
+   assert(ret == 3);
+   assert(waitpid(pid1, 0) < 0);
+   assert(waitpid(-1, 0) < 0);
+   assert(waitpid(getpid(), 0) < 0);
+   printf("ok.\n");*/
+   return pid1;
+ }
+
+
+ /*******************************************************************************
+  * End Test 6
+  ******************************************************************************/
+
+
 void test10_sem() {
   int sem1;
   sem1 = screate(2);
