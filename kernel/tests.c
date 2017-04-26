@@ -119,7 +119,7 @@ int test2(void *arg)
         r = waitpid(pid1, &rval);
         assert(rval == val);
         assert(r == pid1);
-        assert(waitpid(getpid(), &rval) < 0); 
+        assert(waitpid(getpid(), &rval) < 0);
         printf(" 7.\n");
         return 0;
 }
@@ -201,7 +201,6 @@ int test3(void *arg)
  ******************************************************************************/
 void test10_sem() {
   int sem1;
-        
   sem1 = screate(2);
   assert(sem1 >= 0);
   assert(scount(sem1) == 2);
