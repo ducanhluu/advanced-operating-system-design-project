@@ -25,14 +25,14 @@ void kernel_start(void) {
 	masque_IRQ(0,0);
 	init_process_stack();
 	printf("\f");
-	
+
 	printf("group_14@awsome_pc:~$ \n");
 	//start(test0, "test0", 1024, 128, NULL);
 	//start(test1, "test1", 1024, 128, NULL);
 	//start(test2, "test2", 1024, 128, NULL);
-        start(test3, "test3", 1024, 128, NULL);
+        //start(test3, "test3", 1024, 128, NULL);
 	//start(test4, "test4", 1024, 128, NULL);
-	//start(test5, "test5", 1024, 128, NULL);
+	start(test5, "test5", 1024, 128, NULL);
 
 	idle(NULL);
 
