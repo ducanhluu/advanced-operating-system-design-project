@@ -2,6 +2,7 @@
 #include "sem.h"
 #include "tests.h"
 #include "process.h"
+#include "tests/lib/it.c"
 int test0(void *arg) {
   (void)arg;
         register unsigned reg1 = 1u;
@@ -178,7 +179,7 @@ int test3(void *arg)
         printf(" 5");
         assert(waitpid(pid1, 0) == pid1);
         printf(" 6");
-
+        
         assert(getprio(getpid()) == 128);
         pid1 = start(prio5, "prio5", 4000, p, (void *) p);
         assert(pid1 > 0);
@@ -224,7 +225,7 @@ int busy1(void *arg)
 
                 printf(" A");
                 for (i=0; i<loop_count1; i++) {
-                        //test_it();
+                        test_it();
                         for (j=0; j<loop_count0; j++);
                 }
         }
@@ -240,7 +241,7 @@ int busy2(void *arg)
 
                 printf(" B");
                 for (k=0; k<loop_count1; k++) {
-                        //test_it();
+                        test_it();
                         for (j=0; j<loop_count0; j++);
                 }
         }
