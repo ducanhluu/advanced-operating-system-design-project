@@ -199,6 +199,145 @@ int test3(void *arg)
 /*******************************************************************************
  * End Test 3
  ******************************************************************************/
+
+/*******************************************************************************
+ * Test 4
+ ******************************************************************************/
+#ifndef _TEST4_H_
+#define _TEST4_H_
+
+#ifdef microblaze
+static const int loop_count0 = 5;//500;
+static const int loop_count1 = 10;//1000;
+#else
+static const int loop_count0 = 5;//5000;
+static const int loop_count1 = 10;//10000;
+#endif
+
+#endif /* _TEST4_H_ */
+
+int busy1(void *arg)
+{
+        (void)arg;
+        while (1) {
+                int i, j;
+
+                printf(" A");
+                for (i=0; i<loop_count1; i++) {
+                        //test_it();
+                        for (j=0; j<loop_count0; j++);
+                }
+        }
+        return 0;
+}
+
+int busy2(void *arg)
+{
+        int i;
+
+        for (i = 0; i < 3; i++) {
+                int k, j;
+
+                printf(" B");
+                for (k=0; k<loop_count1; k++) {
+                        //test_it();
+                        for (j=0; j<loop_count0; j++);
+                }
+        }
+        i = chprio((int) arg, 16);
+        assert(i == 64);
+        return 0;
+}
+
+int test4(void *args)
+{
+        int pid1, pid2;
+        int r;
+        int arg = 0;
+
+        (void)args;
+
+        assert(getprio(getpid()) == 128);
+        pid1 = start(busy1, "busy1", 4000, 64, (void *) arg);
+        assert(pid1 > 0);
+        pid2 = start(busy2, "busy2", 4000, 64, (void *) pid1);
+        assert(pid2 > 0);
+        printf("1 -");
+        r = chprio(getpid(), 32);
+        assert(r == 128);
+        printf(" - 2");
+        r = kill(pid1);
+        assert(r == 0);
+        assert(waitpid(pid1, 0) == pid1);
+        r = kill(pid2);
+        assert(r < 0); /* kill d'un processus zombie */
+        assert(waitpid(pid2, 0) == pid2);
+        printf(" 3");
+        r = chprio(getpid(), 128);
+        assert(r == 32);
+        printf(" 4.\n");
+
+        return 0;
+}
+
+
+/*******************************************************************************
+ * End Test 4
+ ******************************************************************************/
+
+/*******************************************************************************
+ * Test 5
+ ******************************************************************************/
+int no_run(void *arg)
+{
+        (void)arg;
+        assert(0);
+        return 1;
+}
+int waiter(void *arg)
+{
+        int pid = (int)arg;
+        assert(kill(pid) == 0);
+        assert(waitpid(pid, 0) < 0);
+        return 1;
+}
+
+int test5(void *arg)
+{
+        int pid1, pid2;
+        int r;
+
+        (void)arg;
+
+        // Le processus 0 et la priorite 0 sont des parametres invalides
+        assert(kill(0) < 0);
+        assert(chprio(getpid(), 0) < 0);
+        assert(getprio(getpid()) == 128);
+        pid1 = start(no_run, "no_run", 4000, 64, 0);
+        assert(pid1 > 0);
+        assert(kill(pid1) == 0);
+        assert(kill(pid1) < 0); //pas de kill de zombie
+        assert(chprio(pid1, 128) < 0); //changer la priorite d'un zombie
+	assert(chprio(pid1, 64) < 0); //changer la priorite d'un zombie
+        assert(waitpid(pid1, 0) == pid1);
+        assert(waitpid(pid1, 0) < 0);
+        pid1 = start(no_run, "no_run", 4000, 64, 0);
+        assert(pid1 > 0);
+        pid2 = start(waiter, "waiter", 4000, 65, (void *)pid1);
+        assert(pid2 > 0);
+        assert(waitpid(pid2, &r) == pid2);
+        assert(r == 1);
+        assert(waitpid(pid1, &r) == pid1);
+        assert(r == 0);
+        printf("ok.\n");
+
+	return 0;
+}
+
+/*******************************************************************************
+ * End Test 5
+ ******************************************************************************/
+
 void test10_sem() {
   int sem1;
   sem1 = screate(2);

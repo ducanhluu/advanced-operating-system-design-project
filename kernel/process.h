@@ -6,7 +6,7 @@
 
 #define MAX_NAME_LENGTH 64
 #define STACK_SIZE 8192
-#define PROCESS_TABLE_SIZE 10 //TODO plutôt NBPROC ?
+#define PROCESS_TABLE_SIZE 64 //TODO plutôt NBPROC ?
 #define MAXPRIO 256 //TODO verif borné partout
 
 int idle(void *);
@@ -36,6 +36,11 @@ void passe_activable(int pid);
 
 typedef enum {CHOSEN, ACTIVABLE, SLEEPING, BLOCKED_ON_SEM, BLOCKED_ON_MSG_SEND, BLOCKED_ON_MSG_RCV, ZOMBIE} process_state;
 
+struct children {
+  int pid;
+  link links;
+};
+
 struct process {
   int pid;
   int prio;
@@ -47,7 +52,7 @@ struct process {
   int wakeUpTime;
   int retval;
   int parent_pid;
-  struct list_link children;
+  struct list_link *children;
 };
 
 #endif
