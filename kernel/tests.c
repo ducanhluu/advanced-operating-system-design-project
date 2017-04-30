@@ -208,11 +208,11 @@ int test3(void *arg)
 #define _TEST4_H_
 
 #ifdef microblaze
-static const int loop_count0 = 5;//500;
-static const int loop_count1 = 10;//1000;
+static const int loop_count0 = 500;
+static const int loop_count1 = 1000;
 #else
-static const int loop_count0 = 5;//5000;
-static const int loop_count1 = 10;//10000;
+static const int loop_count0 = 5000;
+static const int loop_count1 = 10000;
 #endif
 
 #endif /* _TEST4_H_ */

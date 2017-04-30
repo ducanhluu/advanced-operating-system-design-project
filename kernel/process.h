@@ -10,11 +10,17 @@
 #define MAXPRIO 256 //TODO verif borné partout
 
 int idle(void *);
-void proc1();
 void init_process_stack();
 void ordonnance();
 int32_t nbr_secondes();
 void ctx_sw(int* old, int* new);
+
+struct list_link process_list;
+struct list_link toKill_list;
+struct list_link sleeping_list;
+
+void display_list(link* head);
+
 
 void unblock(int pid);
 int getpid();
