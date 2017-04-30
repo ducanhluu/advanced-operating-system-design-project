@@ -79,6 +79,11 @@ void hdl_ret() {
 int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int prio, void *arg) {
 	pidmax++;
 	if (pidmax < PROCESS_TABLE_SIZE && prio >= 1 && prio <= MAXPRIO) {
+
+	        if (ssize < 5) {
+			ssize = 5;
+		}
+		
 		struct process* newprocess = (struct process*)mem_alloc(sizeof(struct process));
 		if (queue_empty(&process_list) && chosen == NULL) {
 			newprocess->state = CHOSEN;
@@ -86,13 +91,14 @@ int32_t start(int (*code)(void *), const char *nom, unsigned long ssize, int pri
 			newprocess->state = ACTIVABLE;
 		}
 
-		//TODO si ssize trop petit --> pb a gérer
-		//if ssize trop petit return un truc négatif
-
 		newprocess->pid = pidmax;
 		strcpy(newprocess->name, nom);
 		newprocess->process_stack = (int*)mem_alloc(ssize * sizeof(int));
 
+		if (!(newprocess->process_stack)) {
+			return -1;
+		}
+		
 		newprocess->process_stack[ssize - 3] = (int)code;// CODE FONCTION
 		newprocess->process_stack[ssize - 2] = (int)hdl_ret; // ADR RETOUR
 		newprocess->process_stack[ssize - 1] = (int)arg; // ARG
@@ -243,8 +249,31 @@ int kill(int pid) {
  */
 
 int waitpid(int pid, int *retvalp) {
+	cli();
 	if (pid < 0) {
-		// le processus appelant attend qu'un de ses fils, n'importe lequel, soit terminé et récupère (le cas échéant) sa valeur de retour dans *retvalp, à moins que retvalp soit nul. Cette fonction renvoie une valeur strictement négative si aucun fils n'existe ou sinon le pid de celui dont elle aura récupéré la valeur de retour.
+
+		// le processus appelant attend qu'un de ses fils, n'importe lequel, soit terminé et récupère (le cas échéant) sa valeur de retour dans *retvalp, à moins que retvalp soit nul.
+
+		if (queue_empty(&(chosen->children))) {
+			return -1;
+		}
+		
+		bool found = 0;
+		struct process* child = NULL;
+		while(!found) {
+			queue_for_each(child, chosen->children, struct children, links) {
+				if (child->status = ZOMBIE) {
+					found = true;
+					break;
+				}
+			}
+		}
+
+		&retval = child->retval;
+		// Cette fonction renvoie une valeur strictement négative si aucun fils n'existe ou sinon le pid de celui dont elle aura récupéré la valeur de retour.
+		return child->pid;
+		
+		
 	} else if (pid > 0) {
 		// le processus appelant attend que son fils ayant ce pid soit terminé ou tué
 		struct process* cour = NULL;
@@ -261,6 +290,7 @@ int waitpid(int pid, int *retvalp) {
 		//struct children *child;
 
 		if (chosen->children == NULL) {
+			sti();
 			return -1; //ce processus appelant n'a aucun fils
 		}
 
@@ -298,6 +328,7 @@ int waitpid(int pid, int *retvalp) {
 		/* Cette fonction échoue et renvoie une valeur strictement négative s'il n'existe pas de processus avec ce pid
 		   ou si ce n'est pas un fils du processus appelant. */
 		if (cour == NULL || !found) {
+			sti();
 			return -1;
 		}
 
@@ -313,10 +344,13 @@ int waitpid(int pid, int *retvalp) {
 		queue_del(cour, links);
 		//queue_del(child, links);
 		// En cas de succès, elle retourne la valeur pid.
+		sti();
 		return pid;
 	} else {
+		sti();
 		return -3; // 0: pid invalide
 	}
+	sti();
 	return -2;
 }
 
@@ -334,15 +368,17 @@ int chprio(int pid, int newprio) {
 
 	queue_add(chosen, &process_list, struct process, links, prio);  // WTF HERE ?
 
+	bool found = 0;
 	queue_for_each(cour, &process_list, struct process, links) {
 		if (cour->pid == pid) {
 			anc_prio = cour->prio;
 			cour->prio = newprio;
+			found = 1;
 			break;
 		}
 	}
 
-	if (cour != NULL && cour->state != ZOMBIE) {
+	if (found && cour->state != ZOMBIE) {
 		//si attente du proc ds une file, on le replace selon nvelle prio
 		if (cour->state == SLEEPING) {
 			queue_del(cour,links);
